@@ -1,0 +1,1482 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a sample server for My Manajer API.",
+        "title": "My Manajer API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/businesses": {
+            "get": {
+                "description": "Retrieves a list of all businesses.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Businesses"
+                ],
+                "summary": "Get all businesses",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved all businesses",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.BusinessResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new business with the provided details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Businesses"
+                ],
+                "summary": "Create a new business",
+                "parameters": [
+                    {
+                        "description": "Business object to be created",
+                        "name": "business",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BusinessCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created business",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BusinessResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/businesses/{id}": {
+            "get": {
+                "description": "Retrieves a single business by its ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Businesses"
+                ],
+                "summary": "Get a business by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved business",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BusinessResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Business not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates an existing business with the provided details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Businesses"
+                ],
+                "summary": "Update a business by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Business object to be updated",
+                        "name": "business",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BusinessUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated business",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BusinessResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Business not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a business by its ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Businesses"
+                ],
+                "summary": "Delete a business by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully deleted business",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Business not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/channel-categories": {
+            "get": {
+                "description": "Retrieves a list of all channel categories.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Channel Categories"
+                ],
+                "summary": "Get all channel categories",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved all channel categories",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.ChannelCategoryResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new channel category with the provided details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Channel Categories"
+                ],
+                "summary": "Create a new channel category",
+                "parameters": [
+                    {
+                        "description": "Channel category object to be created",
+                        "name": "category",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChannelCategoryCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created channel category",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ChannelCategoryResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/channel-categories/business/{businessId}": {
+            "get": {
+                "description": "Retrieves a list of all channel categories for a specific business.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Channel Categories"
+                ],
+                "summary": "Get all channel categories by businessId",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "businessId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved all channel categories by businessId",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.ChannelCategoryResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid businessId",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/channel-categories/{id}": {
+            "get": {
+                "description": "Retrieves a single channel category by its ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Channel Categories"
+                ],
+                "summary": "Get a channel category by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Channel Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved channel category",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ChannelCategoryResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Channel category not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates an existing channel category with the provided details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Channel Categories"
+                ],
+                "summary": "Update a channel category by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Channel Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Channel category object to be updated",
+                        "name": "category",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChannelCategoryUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated channel category",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ChannelCategoryResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid input or ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Channel category not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a channel category by its ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Channel Categories"
+                ],
+                "summary": "Delete a channel category by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Channel Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully deleted channel category",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Channel category not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/channels": {
+            "get": {
+                "description": "Retrieves a list of all channels.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Get all channels",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved all channels",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.ChannelResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new channel with the provided details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Create a new channel",
+                "parameters": [
+                    {
+                        "description": "Channel object to be created",
+                        "name": "channel",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChannelCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created channel",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ChannelResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/channels/business/{businessId}": {
+            "get": {
+                "description": "Retrieves a list of all channels for a specific business.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Get all channels by businessId",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "businessId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved all channels by businessId",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.ChannelResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid businessId",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/channels/{id}": {
+            "get": {
+                "description": "Retrieves a single channel by its ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Get a channel by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Channel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved channel",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ChannelResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Channel not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates an existing channel with the provided details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Update a channel by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Channel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Channel object to be updated",
+                        "name": "channel",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChannelUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated channel",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ChannelResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid input or ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Channel not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a channel by its ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Delete a channel by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Channel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully deleted channel",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Channel not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/roles": {
+            "get": {
+                "description": "Get a list of all roles.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Get all roles",
+                "responses": {
+                    "200": {
+                        "description": "Roles retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.RoleResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new role with specified name, business ID, and permissions.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Create a new role",
+                "parameters": [
+                    {
+                        "description": "Role creation request",
+                        "name": "role",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Role created successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.RoleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/roles/{id}": {
+            "get": {
+                "description": "Get role details by its unique ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Get role by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.RoleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Role not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing role's name and permissions by ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Update a role",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Role update request",
+                        "name": "role",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Role updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid input or ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Role not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a role by its unique ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Delete a role",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Role deleted successfully"
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Role not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.BusinessCreateRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "avatar": {
+                    "description": "URL avatar, opsional",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Nama bisnis, wajib, min 3 karakter, max 100",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                }
+            }
+        },
+        "dto.BusinessResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ownerId": {
+                    "type": "string"
+                },
+                "settings": {
+                    "description": "Menggunakan BusinessSettings dari model",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.BusinessSettings"
+                        }
+                    ]
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BusinessSettings": {
+            "type": "object",
+            "properties": {
+                "notifications": {
+                    "type": "string"
+                },
+                "theme": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BusinessUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                }
+            }
+        },
+        "dto.ChannelCategoryCreateRequest": {
+            "type": "object",
+            "required": [
+                "businessId",
+                "name"
+            ],
+            "properties": {
+                "businessId": {
+                    "description": "ID Bisnis induk, wajib",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                }
+            }
+        },
+        "dto.ChannelCategoryResponse": {
+            "type": "object",
+            "properties": {
+                "businessId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ChannelCategoryUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                }
+            }
+        },
+        "dto.ChannelCreateRequest": {
+            "type": "object",
+            "required": [
+                "businessId",
+                "name",
+                "type"
+            ],
+            "properties": {
+                "businessId": {
+                    "description": "ID Bisnis induk, wajib",
+                    "type": "string"
+                },
+                "categoryId": {
+                    "description": "Opsional",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                },
+                "order": {
+                    "description": "Opsional",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "e.g., \"messages\", \"documents\"",
+                    "type": "string",
+                    "enum": [
+                        "messages",
+                        "voices",
+                        "drawings",
+                        "documents",
+                        "databases",
+                        "reports"
+                    ]
+                }
+            }
+        },
+        "dto.ChannelResponse": {
+            "type": "object",
+            "properties": {
+                "businessId": {
+                    "type": "string"
+                },
+                "categoryId": {
+                    "description": "Mengubah dari Category",
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ChannelUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "categoryId": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "messages",
+                        "voices",
+                        "drawings",
+                        "documents",
+                        "databases",
+                        "reports"
+                    ]
+                }
+            }
+        },
+        "dto.CreateRoleRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "businessId": {
+                    "description": "Mengubah menjadi string",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "dto.RoleResponse": {
+            "type": "object",
+            "properties": {
+                "businessId": {
+                    "description": "Mengubah menjadi string",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Mengubah menjadi string",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "dto.UpdateRoleRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "utils.APIResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {},
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        }
+    }
+}

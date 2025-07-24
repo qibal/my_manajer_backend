@@ -1,0 +1,42 @@
+[
+  {
+    "_id": "role_admin",
+    "businessId": "business_1",
+    "name": "Administrator",
+    "permissions": {
+      "channels": ["create", "read", "update", "delete"],
+      "messages": ["create", "read", "update", "delete"],
+      "documents": ["create", "read", "update", "delete"],
+      "drawings": ["create", "read", "update", "delete"],
+      "databases": ["create", "read", "update", "delete"],
+      "reports": ["create", "read", "update", "delete"],
+      "users": ["invite", "kick", "manage_roles"]
+    }
+  },
+  {
+    "_id": "role_member",
+    "businessId": "business_1",
+    "name": "Member",
+    "permissions": {
+      "channels": ["read"],
+      "messages": ["create", "read", "update_own", "delete_own"],
+      "documents": ["create", "read", "update_own"],
+      "drawings": ["create", "read", "update_own"],
+      "databases": ["read", "query"],
+      "reports": ["read"]
+    }
+  },
+  {
+    "_id": "role_viewer",
+    "businessId": "business_1",
+    "name": "Viewer",
+    "permissions": {
+      "channels": ["read"],
+      "messages": ["read"],
+      "documents": ["read"],
+      "drawings": ["read"],
+      "databases": ["read"],
+      "reports": ["read"]
+    }
+  }
+] 

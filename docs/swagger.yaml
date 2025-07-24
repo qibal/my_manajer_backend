@@ -1,0 +1,940 @@
+basePath: /api/v1
+definitions:
+  dto.BusinessCreateRequest:
+    properties:
+      avatar:
+        description: URL avatar, opsional
+        type: string
+      name:
+        description: Nama bisnis, wajib, min 3 karakter, max 100
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - name
+    type: object
+  dto.BusinessResponse:
+    properties:
+      avatar:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      ownerId:
+        type: string
+      settings:
+        allOf:
+        - $ref: '#/definitions/dto.BusinessSettings'
+        description: Menggunakan BusinessSettings dari model
+      updatedAt:
+        type: string
+    type: object
+  dto.BusinessSettings:
+    properties:
+      notifications:
+        type: string
+      theme:
+        type: string
+    type: object
+  dto.BusinessUpdateRequest:
+    properties:
+      avatar:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+    type: object
+  dto.ChannelCategoryCreateRequest:
+    properties:
+      businessId:
+        description: ID Bisnis induk, wajib
+        type: string
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - businessId
+    - name
+    type: object
+  dto.ChannelCategoryResponse:
+    properties:
+      businessId:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  dto.ChannelCategoryUpdateRequest:
+    properties:
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+    type: object
+  dto.ChannelCreateRequest:
+    properties:
+      businessId:
+        description: ID Bisnis induk, wajib
+        type: string
+      categoryId:
+        description: Opsional
+        type: string
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+      order:
+        description: Opsional
+        type: integer
+      type:
+        description: e.g., "messages", "documents"
+        enum:
+        - messages
+        - voices
+        - drawings
+        - documents
+        - databases
+        - reports
+        type: string
+    required:
+    - businessId
+    - name
+    - type
+    type: object
+  dto.ChannelResponse:
+    properties:
+      businessId:
+        type: string
+      categoryId:
+        description: Mengubah dari Category
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      order:
+        type: integer
+      type:
+        type: string
+    type: object
+  dto.ChannelUpdateRequest:
+    properties:
+      categoryId:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+      order:
+        type: integer
+      type:
+        enum:
+        - messages
+        - voices
+        - drawings
+        - documents
+        - databases
+        - reports
+        type: string
+    type: object
+  dto.CreateRoleRequest:
+    properties:
+      businessId:
+        description: Mengubah menjadi string
+        type: string
+      name:
+        type: string
+      permissions:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        type: object
+    required:
+    - name
+    type: object
+  dto.RoleResponse:
+    properties:
+      businessId:
+        description: Mengubah menjadi string
+        type: string
+      id:
+        description: Mengubah menjadi string
+        type: string
+      name:
+        type: string
+      permissions:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        type: object
+    type: object
+  dto.UpdateRoleRequest:
+    properties:
+      name:
+        type: string
+      permissions:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        type: object
+    type: object
+  utils.APIResponse:
+    properties:
+      data: {}
+      error: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server for My Manajer API.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: My Manajer API
+  version: "1.0"
+paths:
+  /businesses:
+    get:
+      description: Retrieves a list of all businesses.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all businesses
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.BusinessResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get all businesses
+      tags:
+      - Businesses
+    post:
+      consumes:
+      - application/json
+      description: Creates a new business with the provided details.
+      parameters:
+      - description: Business object to be created
+        in: body
+        name: business
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BusinessCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created business
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BusinessResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Create a new business
+      tags:
+      - Businesses
+  /businesses/{id}:
+    delete:
+      description: Deletes a business by its ID.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted business
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Business not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Delete a business by ID
+      tags:
+      - Businesses
+    get:
+      description: Retrieves a single business by its ID.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved business
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BusinessResponse'
+              type: object
+        "404":
+          description: Not Found - Business not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get a business by ID
+      tags:
+      - Businesses
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing business with the provided details.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Business object to be updated
+        in: body
+        name: business
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BusinessUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated business
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BusinessResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Business not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Update a business by ID
+      tags:
+      - Businesses
+  /channel-categories:
+    get:
+      description: Retrieves a list of all channel categories.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all channel categories
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ChannelCategoryResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get all channel categories
+      tags:
+      - Channel Categories
+    post:
+      consumes:
+      - application/json
+      description: Creates a new channel category with the provided details.
+      parameters:
+      - description: Channel category object to be created
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChannelCategoryCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created channel category
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ChannelCategoryResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Create a new channel category
+      tags:
+      - Channel Categories
+  /channel-categories/{id}:
+    delete:
+      description: Deletes a channel category by its ID.
+      parameters:
+      - description: Channel Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted channel category
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "400":
+          description: Bad Request - Invalid ID
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Channel category not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Delete a channel category by ID
+      tags:
+      - Channel Categories
+    get:
+      description: Retrieves a single channel category by its ID.
+      parameters:
+      - description: Channel Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved channel category
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ChannelCategoryResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid ID
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Channel category not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get a channel category by ID
+      tags:
+      - Channel Categories
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing channel category with the provided details.
+      parameters:
+      - description: Channel Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Channel category object to be updated
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChannelCategoryUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated channel category
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ChannelCategoryResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input or ID
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Channel category not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Update a channel category by ID
+      tags:
+      - Channel Categories
+  /channel-categories/business/{businessId}:
+    get:
+      description: Retrieves a list of all channel categories for a specific business.
+      parameters:
+      - description: Business ID
+        in: path
+        name: businessId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all channel categories by businessId
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ChannelCategoryResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request - Invalid businessId
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get all channel categories by businessId
+      tags:
+      - Channel Categories
+  /channels:
+    get:
+      description: Retrieves a list of all channels.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all channels
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ChannelResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get all channels
+      tags:
+      - Channels
+    post:
+      consumes:
+      - application/json
+      description: Creates a new channel with the provided details.
+      parameters:
+      - description: Channel object to be created
+        in: body
+        name: channel
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChannelCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created channel
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ChannelResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Create a new channel
+      tags:
+      - Channels
+  /channels/{id}:
+    delete:
+      description: Deletes a channel by its ID.
+      parameters:
+      - description: Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted channel
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "400":
+          description: Bad Request - Invalid ID
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Channel not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Delete a channel by ID
+      tags:
+      - Channels
+    get:
+      description: Retrieves a single channel by its ID.
+      parameters:
+      - description: Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved channel
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ChannelResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid ID
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Channel not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get a channel by ID
+      tags:
+      - Channels
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing channel with the provided details.
+      parameters:
+      - description: Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Channel object to be updated
+        in: body
+        name: channel
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChannelUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated channel
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ChannelResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input or ID
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Channel not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Update a channel by ID
+      tags:
+      - Channels
+  /channels/business/{businessId}:
+    get:
+      description: Retrieves a list of all channels for a specific business.
+      parameters:
+      - description: Business ID
+        in: path
+        name: businessId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all channels by businessId
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ChannelResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request - Invalid businessId
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get all channels by businessId
+      tags:
+      - Channels
+  /roles:
+    get:
+      description: Get a list of all roles.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Roles retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.RoleResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get all roles
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      description: Create a new role with specified name, business ID, and permissions.
+      parameters:
+      - description: Role creation request
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Role created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.RoleResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Create a new role
+      tags:
+      - Roles
+  /roles/{id}:
+    delete:
+      description: Delete a role by its unique ID.
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Role deleted successfully
+        "400":
+          description: Bad Request - Invalid ID
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Role not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Delete a role
+      tags:
+      - Roles
+    get:
+      description: Get role details by its unique ID.
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.RoleResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid ID
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Role not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Get role by ID
+      tags:
+      - Roles
+    put:
+      consumes:
+      - application/json
+      description: Update an existing role's name and permissions by ID.
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Role update request
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role updated successfully
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "400":
+          description: Bad Request - Invalid input or ID
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Role not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      summary: Update a role
+      tags:
+      - Roles
+swagger: "2.0"

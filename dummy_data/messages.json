@@ -1,0 +1,25 @@
+[
+  {
+    "_id": "message_1",
+    "channelId": "channel_1", 
+    "userId": "user_1",
+    "content": "Hello world!",
+    "messageType": "text", 
+    "mediaPath": null,
+    "mediaMetadata": {
+      "filename": null,
+      "size": null,
+      "width": null,
+      "height": null
+    },
+    "createdAt": "2024-07-28T11:00:00Z",
+    "updatedAt": null,
+    "isPinned": false,
+    "reactions": [
+      {
+        "emoji": "👋",
+        "userIds": ["user_2", "user_3"]
+      }
+    ]
+  }
+] 

@@ -1,0 +1,64 @@
+[
+  {
+    "_id": "doc_1",
+    "channelId": "channel_3",
+    "authorId": "user_1",
+    "title": "Project Alpha - Briefing Awal",
+    "content": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": { "level": 1 },
+          "content": [{ "type": "text", "text": "Project Alpha - Briefing Awal" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "Dokumen ini berisi briefing awal untuk Project Alpha, termasuk tujuan, target audiens, dan timeline." }]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Tujuan Proyek" }]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Membangun aplikasi manajemen proyek baru." }] }]
+            },
+            {
+              "type": "listItem",
+              "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Integrasi dengan platform Discord." }] }]
+            }
+          ]
+        }
+      ]
+    },
+    "createdAt": "2024-07-28T14:00:00Z",
+    "updatedAt": "2024-07-28T14:30:00Z"
+  },
+  {
+    "_id": "doc_2",
+    "channelId": "channel_3",
+    "authorId": "user_3",
+    "title": "Analisis Kebutuhan Teknis",
+    "content": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": { "level": 1 },
+          "content": [{ "type": "text", "text": "Analisis Kebutuhan Teknis" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "Stack teknologi yang diusulkan: Next.js, MongoDB, dan TailwindCSS." }]
+        }
+      ]
+    },
+    "createdAt": "2024-07-29T09:00:00Z",
+    "updatedAt": "2024-07-29T09:00:00Z"
+  }
+] 

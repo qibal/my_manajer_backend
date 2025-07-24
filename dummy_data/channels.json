@@ -1,0 +1,72 @@
+[
+  {
+    "_id": "channel_1",
+    "businessId": "business_1",
+    "name": "General Chat",
+    "type": "messages",
+    "category": "Text Channels",
+    "order": 1,
+    "createdAt": "2024-07-28T10:01:00Z",
+    "unread": 3
+  },
+  {
+    "_id": "channel_2",
+    "businessId": "business_1",
+    "name": "Team Announcements",
+    "type": "messages",
+    "category": "Information",
+    "order": 2,
+    "createdAt": "2024-07-28T10:02:00Z",
+    "unread": 1
+  },
+  {
+    "_id": "channel_3",
+    "businessId": "business_1",
+    "name": "Project Alpha - Docs",
+    "type": "documents",
+    "category": "Project Alpha",
+    "order": 1,
+    "createdAt": "2024-07-28T10:03:00Z",
+    "unread": 2
+  },
+  {
+    "_id": "channel_4",
+    "businessId": "business_1",
+    "name": "Project Alpha - Whiteboard",
+    "type": "drawings",
+    "category": "Project Alpha",
+    "order": 2,
+    "createdAt": "2024-07-28T10:04:00Z",
+    "unread": 0
+  },
+  {
+    "_id": "channel_5",
+    "businessId": "business_1",
+    "name": "User Analytics",
+    "type": "databases",
+    "category": "ANALYTICS",
+    "order": 1,
+    "createdAt": "2024-07-28T10:05:00Z",
+    "unread": 0
+  },
+  {
+    "_id": "channel_6",
+    "businessId": "business_1",
+    "name": "Monthly Financials",
+    "type": "reports",
+    "category": "FINANCE",
+    "order": 1,
+    "createdAt": "2024-07-28T10:06:00Z",
+    "unread": 0
+  },
+  {
+    "_id": "channel_7",
+    "businessId": "business_1",
+    "name": "Project Alpha - Discussion",
+    "type": "messages",
+    "category": "Project Alpha",
+    "order": 3,
+    "createdAt": "2024-07-28T10:07:00Z",
+    "unread": 5
+  }
+]

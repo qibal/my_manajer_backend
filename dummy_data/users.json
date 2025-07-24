@@ -1,0 +1,50 @@
+[
+  {
+    "_id": "user_1",
+    "businessIds": ["business_1"],
+    "username": "Andi",
+    "email": "andi@example.com",
+    "avatar": "https://i.pravatar.cc/150?u=user_1",
+    "status": "online",
+    "roles": {
+      "business_1": ["role_admin"]
+    },
+    "createdAt": "2024-07-28T09:00:00Z"
+  },
+  {
+    "_id": "user_2",
+    "businessIds": ["business_1"],
+    "username": "Budi",
+    "email": "budi@example.com",
+    "avatar": "https://i.pravatar.cc/150?u=user_2",
+    "status": "offline",
+    "roles": {
+      "business_1": ["role_member"]
+    },
+    "createdAt": "2024-07-28T09:05:00Z"
+  },
+  {
+    "_id": "user_3",
+    "businessIds": ["business_1"],
+    "username": "Cinta",
+    "email": "cinta@example.com",
+    "avatar": "https://i.pravatar.cc/150?u=user_3",
+    "status": "online",
+    "roles": {
+      "business_1": ["role_member"]
+    },
+    "createdAt": "2024-07-28T09:10:00Z"
+  },
+  {
+    "_id": "user_4",
+    "businessIds": ["business_1"],
+    "username": "Dewi",
+    "email": "dewi@example.com",
+    "avatar": "https://i.pravatar.cc/150?u=user_4",
+    "status": "idle",
+    "roles": {
+      "business_1": ["role_viewer"]
+    },
+    "createdAt": "2024-07-28T09:15:00Z"
+  }
+] 

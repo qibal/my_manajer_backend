@@ -1,0 +1,146 @@
+import React, { useEffect, useState, useRef } from 'react';
+
+function WebSocketChat({{ channelId }}) {
+  const [messages, setMessages] = useState([]);
+  const [inputMessage, setInputMessage] = useState('');
+  const ws = useRef(null);
+
+  useEffect(() => {
+    // Replace with your backend WebSocket URL
+    const websocketUrl = `ws://localhost:8081/ws/messages/${channelId}`;
+    ws.current = new WebSocket(websocketUrl);
+
+    ws.current.onopen = () => {
+      console.log('Connected to WebSocket');
+      // You can send a message to fetch history immediately after connecting
+      sendMessage({ type: 'get_message_history', payload: { limit: 50, skip: 0 } });
+    };
+
+    ws.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log('Received:', data);
+
+      switch (data.type) {
+        case 'message_history':
+          setMessages(data.payload);
+          break;
+        case 'new_message':
+          setMessages((prevMessages) => [...prevMessages, data.payload]);
+          break;
+        case 'message_updated':
+          setMessages((prevMessages) =>
+            prevMessages.map((msg) =>
+              msg.ID === data.payload.ID ? data.payload : msg
+            )
+          );
+          break;
+        case 'message_deleted':
+          setMessages((prevMessages) =>
+            prevMessages.filter((msg) => msg.ID !== data.payload.id)
+          );
+          break;
+        case 'reaction_added':
+        case 'reaction_removed':
+          setMessages((prevMessages) =>
+            prevMessages.map((msg) =>
+              msg.ID === data.payload.ID ? data.payload : msg
+            )
+          );
+          break;
+        case 'error':
+          console.error('WebSocket Error:', data.payload);
+          break;
+        default:
+          console.log('Unhandled message type:', data.type, data.payload);
+      }
+    };
+
+    ws.current.onclose = () => {
+      console.log('Disconnected from WebSocket');
+    };
+
+    ws.current.onerror = (error) => {
+      console.error('WebSocket Error:', error);
+    };
+
+    return () => {
+      ws.current.close();
+    };
+  }, [channelId]);
+
+  const sendMessage = (message) => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify(message));
+    } else {
+      console.warn('WebSocket not open.');
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (inputMessage.trim()) {
+      const messagePayload = {
+        userID: 'some_user_id', // Replace with actual user ID from your auth system
+        content: inputMessage,
+        messageType: 'text',
+        // mediaPath: '',
+        // mediaMetadata: null,
+      };
+      sendMessage({ type: 'client_message', payload: messagePayload });
+      setInputMessage('');
+    }
+  };
+
+  return (
+    <div>
+      <h1>Chat for Channel: {channelId}</h1>
+      <div style={{ border: '1px solid #ccc', height: '300px', overflowY: 'scroll', padding: '10px' }}>
+        {messages.map((msg) => (
+          <div key={msg.ID} style={{ marginBottom: '5px' }}>
+            <strong>{msg.UserID}:</strong> {msg.Content} ({new Date(msg.CreatedAt).toLocaleTimeString()})
+            {msg.Reactions && msg.Reactions.map((r, idx) => (
+              <span key={idx} style={{ marginLeft: '5px' }}>{r.Emoji}</span>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: '10px' }}>
+        <input
+          type="text"
+          value={inputMessage}
+          onChange={(e) => setInputMessage(e.target.value)}
+          placeholder="Type a message..."
+          style={{ width: 'calc(100% - 100px)', padding: '8px' }}
+        />
+        <button onClick={handleSendMessage} style={{ padding: '8px 15px', marginLeft: '5px' }}>
+          Send
+        </button>
+      </div>
+      <p>
+        To use this component, import it into your Next.js page (e.g., `pages/chat/[channelId].js`).
+        Make sure your Next.js app can fetch the `channelId` from the URL.
+      </p>
+      <pre>
+        <code>
+          {`
+// pages/chat/[channelId].js
+import { useRouter } from 'next/router';
+import WebSocketChat from '../../client_example/nextjs_websocket_client'; // Adjust path as needed
+
+export default function ChatPage() {
+  const router = useRouter();
+  const { channelId } = router.query;
+
+  if (!channelId) {
+    return <div>Loading channel...</div>;
+  }
+
+  return <WebSocketChat channelId={channelId} />;
+}
+          `}
+        </code>
+      </pre>
+    </div>
+  );
+}
+
+export default WebSocketChat; 

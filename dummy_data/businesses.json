@@ -1,0 +1,26 @@
+[
+  {
+    "_id": "business_1",
+    "name": "Pinwin Studio",
+    "ownerId": "user_1",
+    "createdAt": "2024-07-28T10:00:00Z",
+    "updatedAt": "2024-07-28T10:00:00Z",
+    "settings": {
+      "theme": "dark",
+      "notifications": "all"
+    },
+    "avatar": "/placeholder.svg?height=48&width=48"
+  },
+  {
+    "_id": "business_2",
+    "name": "Youtube",
+    "ownerId": "user_1",
+    "createdAt": "2024-07-28T10:00:00Z",
+    "updatedAt": "2024-07-28T10:00:00Z",
+    "settings": {
+      "theme": "dark",
+      "notifications": "all"
+    },
+    "avatar": "/placeholder.svg?height=48&width=48"
+  }
+]

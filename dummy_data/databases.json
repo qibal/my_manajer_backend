@@ -1,0 +1,32 @@
+[
+  {
+    "_id": "db_1",
+    "channelId": "channel_5",
+    "authorId": "user_4",
+    "title": "Data Pendaftaran Pengguna - Juli 2024",
+    "databaseData": {
+      "columns": [
+        { "id": "col_1", "name": "Tanggal", "type": "date" },
+        { "id": "col_2", "name": "Email", "type": "text" },
+        { "id": "col_3", "name": "Sumber Akun", "type": "select", "options": ["Organik", "Undangan", "Iklan"] },
+        { "id": "col_4", "name": "Status", "type": "boolean" }
+      ],
+      "rows": [
+        {
+          "id": "row_1",
+          "values": { "col_1": "2024-07-25", "col_2": "user_a@test.com", "col_3": "Organik", "col_4": true }
+        },
+        {
+          "id": "row_2",
+          "values": { "col_1": "2024-07-26", "col_2": "user_b@test.com", "col_3": "Iklan", "col_4": true }
+        },
+        {
+          "id": "row_3",
+          "values": { "col_1": "2024-07-27", "col_2": "user_c@test.com", "col_3": "Undangan", "col_4": false }
+        }
+      ]
+    },
+    "createdAt": "2024-07-29T15:00:00Z",
+    "updatedAt": "2024-07-29T15:10:00Z"
+  }
+] 

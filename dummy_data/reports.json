@@ -1,0 +1,36 @@
+[
+  {
+    "_id": "report_1",
+    "channelId": "channel_6",
+    "authorId": "user_1",
+    "title": "Laporan Keuangan - Juli 2024",
+    "reportData": {
+      "summary": {
+        "period": "Juli 2024",
+        "income": 50000000,
+        "expense": 35000000,
+        "profit": 15000000
+      },
+      "details": [
+        {
+          "category": "Pemasukan",
+          "items": [
+            { "description": "Project Alpha - Milestone 1", "amount": 30000000 },
+            { "description": "Project Beta - Final Payment", "amount": 20000000 }
+          ]
+        },
+        {
+          "category": "Pengeluaran",
+          "items": [
+            { "description": "Gaji Karyawan", "amount": 25000000 },
+            { "description": "Sewa Kantor", "amount": 5000000 },
+            { "description": "Biaya Operasional", "amount": 5000000 }
+          ]
+        }
+      ],
+      "conclusion": "Profitabilitas bulan ini positif, sesuai dengan target."
+    },
+    "createdAt": "2024-08-01T10:00:00Z",
+    "updatedAt": "2024-08-01T10:00:00Z"
+  }
+] 

@@ -1,0 +1,66 @@
+[
+  {
+    "_id": "drawing_1",
+    "channelId": "channel_4",
+    "authorId": "user_2",
+    "title": "User Flow - Onboarding",
+    "drawingData": {
+      "version": "1.0",
+      "shapes": [
+        {
+          "id": "shape_1",
+          "type": "rectangle",
+          "x": 50,
+          "y": 50,
+          "width": 150,
+          "height": 80,
+          "fill": "#E6F7FF",
+          "stroke": "#91D5FF",
+          "text": "Buka Aplikasi"
+        },
+        {
+          "id": "shape_2",
+          "type": "rectangle",
+          "x": 250,
+          "y": 50,
+          "width": 150,
+          "height": 80,
+          "fill": "#E6F7FF",
+          "stroke": "#91D5FF",
+          "text": "Login/Register"
+        },
+        {
+          "id": "shape_3",
+          "type": "rectangle",
+          "x": 450,
+          "y": 50,
+          "width": 150,
+          "height": 80,
+          "fill": "#E6F7FF",
+          "stroke": "#91D5FF",
+          "text": "Masuk ke Dashboard"
+        },
+        {
+          "id": "arrow_1",
+          "type": "arrow",
+          "points": [
+            { "x": 200, "y": 90 },
+            { "x": 250, "y": 90 }
+          ],
+          "stroke": "#595959"
+        },
+        {
+          "id": "arrow_2",
+          "type": "arrow",
+          "points": [
+            { "x": 400, "y": 90 },
+            { "x": 450, "y": 90 }
+          ],
+          "stroke": "#595959"
+        }
+      ]
+    },
+    "createdAt": "2024-07-29T11:00:00Z",
+    "updatedAt": "2024-07-29T11:25:00Z"
+  }
+] 
