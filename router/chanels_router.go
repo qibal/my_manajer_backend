@@ -2,6 +2,7 @@ package router
 
 import (
 	"backend_my_manajer/handler"
+	"backend_my_manajer/middleware" // Mengimpor middleware
 	"backend_my_manajer/repository"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,10 +16,8 @@ func SetupChannelRoutes(router fiber.Router, dbClient *mongo.Client) {
 	channelRepo := repository.NewChannelRepository(dbClient)
 	channelHandler := handler.NewChannelHandler(channelRepo)
 
-	// Membuat grup route untuk semua endpoint yang berkaitan dengan Channel
-	// Semua rute di dalam grup ini akan memiliki prefix "/channels"
-	// Prefix ini akan digabungkan dengan prefix dari router induk (misalnya /api/v1/)
-	channelRoutes := router.Group("/channels")
+	// Menerapkan middleware autentikasi ke semua rute channel
+	channelRoutes := router.Group("/channels", middleware.AuthMiddleware())
 
 	// Mendefinisikan endpoint CRUD untuk Channel
 	channelRoutes.Post("/", channelHandler.CreateChannel)

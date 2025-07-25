@@ -2,6 +2,7 @@ package router
 
 import (
 	"backend_my_manajer/handler"
+	"backend_my_manajer/middleware" // Mengimpor middleware
 	"backend_my_manajer/repository"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,7 +14,8 @@ func SetupRoleRoutes(api fiber.Router, dbClient *mongo.Client) {
 	repo := repository.NewRoleRepository(dbClient)
 	handler := handler.NewRoleHandler(repo)
 
-	roles := api.Group("/roles")
+	// Menerapkan middleware autentikasi ke semua rute role
+	roles := api.Group("/roles", middleware.AuthMiddleware())
 	roles.Post("/", handler.CreateRole)      // POST /api/v1/roles
 	roles.Get("/", handler.GetAllRoles)      // GET /api/v1/roles
 	roles.Get("/:id", handler.GetRoleByID)   // GET /api/v1/roles/:id

@@ -9,6 +9,7 @@ import (
 	"backend_my_manajer/utils"
 
 	_ "backend_my_manajer/docs" // Import generated docs
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"

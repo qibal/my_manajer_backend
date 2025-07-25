@@ -2,9 +2,8 @@ package router
 
 import (
 	"backend_my_manajer/handler"
+	"backend_my_manajer/middleware" // Mengimpor middleware
 	"backend_my_manajer/repository"
-
-	// "backend_my_manajer/middleware" // Uncomment jika ingin menggunakan middleware
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,10 +16,8 @@ func SetupBusinessRoutes(router fiber.Router, dbClient *mongo.Client) {
 	businessRepo := repository.NewBusinessRepository(dbClient)
 	businessHandler := handler.NewBusinessHandler(businessRepo)
 
-	// Membuat grup route untuk semua endpoint yang berkaitan dengan Business
-	// Semua rute di dalam grup ini akan memiliki prefix "/businesses"
-	// Prefix ini akan digabungkan dengan prefix dari router induk (misalnya /api/v1/)
-	businessRoutes := router.Group("/businesses")
+	// Menerapkan middleware autentikasi ke semua rute bisnis
+	businessRoutes := router.Group("/businesses", middleware.AuthMiddleware())
 
 	// Mendefinisikan endpoint CRUD untuk Business
 	// POST /api/v1/businesses

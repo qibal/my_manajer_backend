@@ -2,6 +2,7 @@ package router
 
 import (
 	"backend_my_manajer/handler"
+	"backend_my_manajer/middleware" // Mengimpor middleware
 	"backend_my_manajer/repository"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,9 +16,8 @@ func SetupChannelCategoryRoutes(router fiber.Router, dbClient *mongo.Client) {
 	channelCategoryRepo := repository.NewChannelCategoryRepository(dbClient)
 	channelCategoryHandler := handler.NewChannelCategoryHandler(channelCategoryRepo)
 
-	// Membuat grup route untuk semua endpoint yang berkaitan dengan ChannelCategory
-	// Semua rute di dalam grup ini akan memiliki prefix "/channel-categories"
-	channelCategoryRoutes := router.Group("/channel-categories")
+	// Menerapkan middleware autentikasi ke semua rute kategori channel
+	channelCategoryRoutes := router.Group("/channel-categories", middleware.AuthMiddleware())
 
 	// Mendefinisikan endpoint CRUD untuk ChannelCategory
 	channelCategoryRoutes.Post("/", channelCategoryHandler.CreateChannelCategory)
