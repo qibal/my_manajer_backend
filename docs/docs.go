@@ -1875,16 +1875,37 @@ const docTemplate = `{
         "dto.LoginResponse": {
             "type": "object",
             "properties": {
+                "avatar": {
+                    "type": "string"
+                },
                 "businessIds": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
-                "token": {
+                "createdAt": {
                     "type": "string"
                 },
-                "userId": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "roles": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "token": {
                     "type": "string"
                 },
                 "username": {

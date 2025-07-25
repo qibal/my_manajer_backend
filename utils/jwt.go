@@ -2,6 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"log" // Mengimpor paket log standar
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -9,7 +11,19 @@ import (
 
 // JWTSecretKey adalah kunci rahasia untuk menandatangani JWT.
 // Seharusnya dimuat dari variabel lingkungan atau konfigurasi yang aman.
-var JWTSecretKey = []byte("supersecretjwtkey") // Ganti dengan kunci yang lebih kuat dan aman
+var JWTSecretKey = getJWTSecretKey() // Mengubah inisialisasi
+
+// getJWTSecretKey mengambil kunci rahasia JWT dari variabel lingkungan.
+// Jika tidak ditemukan, akan menggunakan kunci default dan mencatat peringatan.
+func getJWTSecretKey() []byte {
+	secret := os.Getenv("JWT_SECRET_KEY")
+	if secret == "" {
+		// Menggunakan log standar untuk menghindari masalah urutan inisialisasi
+		log.Println("WARNING: Variabel lingkungan JWT_SECRET_KEY tidak ditemukan. Menggunakan kunci default yang tidak aman.")
+		return []byte("supersecretjwtkey") // Kunci default yang tidak aman, hanya untuk pengembangan/contoh
+	}
+	return []byte(secret)
+}
 
 // Claims adalah struktur kustom yang akan digunakan untuk JWT.
 type Claims struct {

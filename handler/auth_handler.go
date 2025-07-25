@@ -81,8 +81,13 @@ func (h *authHandlerImpl) Login(c *fiber.Ctx) error {
 
 	return utils.SendSuccessResponse(c, fiber.StatusOK, "Login successful", dto.LoginResponse{
 		Token:       token,
-		UserID:      user.ID.Hex(),
+		ID:          user.ID.Hex(),
 		Username:    user.Username,
+		Email:       user.Email,
+		Avatar:      user.Avatar,
+		IsActive:    user.IsActive,
+		Roles:       user.Roles,
+		CreatedAt:   user.CreatedAt,
 		BusinessIDs: user.BusinessIDs,
 	})
 }

@@ -12,10 +12,15 @@ type LoginRequest struct {
 
 // LoginResponse defines the successful login response.
 type LoginResponse struct {
-	Token       string   `json:"token"`
-	UserID      string   `json:"userId"`
-	Username    string   `json:"username"`
-	BusinessIDs []string `json:"businessIds"`
+	Token       string              `json:"token"`
+	ID          string              `json:"id"`
+	Username    string              `json:"username"`
+	Email       string              `json:"email"`
+	Avatar      string              `json:"avatar"`
+	IsActive    bool                `json:"isActive"`
+	Roles       map[string][]string `json:"roles"`
+	CreatedAt   time.Time           `json:"createdAt"`
+	BusinessIDs []string            `json:"businessIds"`
 }
 
 // RegisterUserRequest defines the structure for creating a new user by an admin.

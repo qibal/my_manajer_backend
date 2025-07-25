@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"os"
 
@@ -9,13 +8,11 @@ import (
 	"backend_my_manajer/router"
 	"backend_my_manajer/utils"
 
+	_ "backend_my_manajer/docs" // Import generated docs
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
-
-	_ "backend_my_manajer/docs" // Import generated docs
-
-	fiberSwagger "github.com/swaggo/fiber-swagger"
+	fiberSwagger "github.com/swaggo/fiber-swagger" // Import a swagger
 )
 
 // @title My Manajer API
@@ -32,42 +29,42 @@ import (
 
 // @host localhost:8080
 // @BasePath /api/v1
-
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
 // @description "Type 'Bearer' followed by a space and JWT token."
 func main() {
+	// Muat file .env
 	err := godotenv.Load()
-	if err != nil {
-		utils.LogError(err, "Error loading .env file")
+	if err != nil && !os.IsNotExist(err) {
+		log.Fatalf("Error loading .env file: %v", err)
 	}
+	utils.LogInfo("Variabel lingkungan berhasil dimuat dari .env")
 
+	// Inisialisasi koneksi database
 	dbClient := config.ConnectDB()
-	// Pastikan koneksi database ditutup saat aplikasi berhenti
 	defer func() {
-		if dbClient != nil {
-			if err := dbClient.Disconnect(context.TODO()); err != nil {
-				utils.LogError(err, "Failed to disconnect database")
-			}
-			utils.LogInfo("Database connection closed.")
+		if err := dbClient.Disconnect(nil); err != nil {
+			log.Fatal(err)
 		}
 	}()
 
+	// Inisialisasi Fiber app
 	app := fiber.New()
 
-	// Gunakan CorsConfig dari paket config
+	// Menggunakan middleware CORS dengan konfigurasi
 	app.Use(cors.New(config.CorsConfig()))
 
+	// Setup rute API
 	router.SetupRoutes(app, dbClient)
 
+	// Setup rute untuk Swagger
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 
+	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-
-	utils.LogInfo("Server starting on port %s", port)
 	log.Fatal(app.Listen(":" + port))
 }

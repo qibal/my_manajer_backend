@@ -205,13 +205,27 @@ definitions:
     type: object
   dto.LoginResponse:
     properties:
+      avatar:
+        type: string
       businessIds:
         items:
           type: string
         type: array
-      token:
+      createdAt:
         type: string
-      userId:
+      email:
+        type: string
+      id:
+        type: string
+      isActive:
+        type: boolean
+      roles:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        type: object
+      token:
         type: string
       username:
         type: string

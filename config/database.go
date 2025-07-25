@@ -109,7 +109,7 @@ func main() {
 	// Inisialisasi koneksi database
 	dbClient := config.ConnectDB()
 	defer func() {
-		if err := dbClient.Disconnect(context.TODO()); err != nil {
+		if err := dbClient.Disconnect(nil); err != nil { // Mengubah context.TODO() menjadi nil
 			log.Fatal(err)
 		}
 	}()
