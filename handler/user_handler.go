@@ -56,6 +56,12 @@ func (h *userHandlerImpl) RegisterUser(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Username and password are required", nil)
 	}
 
+	// Memeriksa kekuatan password
+	isValidPassword, passwordMessage := utils.ValidatePasswordStrength(req.Password)
+	if !isValidPassword {
+		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Password lemah", passwordMessage)
+	}
+
 	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
 

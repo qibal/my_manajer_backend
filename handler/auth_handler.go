@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"backend_my_manajer/dto"
+	"backend_my_manajer/model"
 	"backend_my_manajer/repository"
 	"backend_my_manajer/utils"
 
@@ -50,10 +51,21 @@ func (h *authHandlerImpl) Login(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
 
-	user, err := h.userRepo.FindUserByEmailOrUsername(ctx, req.Email, req.Username)
-	if err != nil {
-		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Error finding user", err.Error())
+	var user *model.User
+	var err error
+
+	if req.Email != "" {
+		user, err = h.userRepo.FindUserByEmail(ctx, req.Email)
+		if err != nil {
+			return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Error finding user by email", err.Error())
+		}
+	} else if req.Username != "" {
+		user, err = h.userRepo.FindUserByUsername(ctx, req.Username)
+		if err != nil {
+			return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Error finding user by username", err.Error())
+		}
 	}
+
 	if user == nil {
 		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "Invalid credentials", nil)
 	}
