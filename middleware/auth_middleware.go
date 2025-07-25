@@ -42,23 +42,41 @@ func AuthMiddleware() fiber.Handler {
 // AdminAuthMiddleware adalah middleware untuk memvalidasi token JWT dan memeriksa peran admin.
 func AdminAuthMiddleware() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// Pertama, jalankan AuthMiddleware dasar
-		err := AuthMiddleware()(c)
-		if err != nil {
-			return err // Mengembalikan error dari AuthMiddleware (misal: token tidak ada/tidak valid)
+		// Duplikasi logika dari AuthMiddleware untuk validasi token dasar
+		authHeader := c.Get("Authorization")
+		if authHeader == "" {
+			return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "Token autentikasi diperlukan", nil)
 		}
 
-		// Ambil peran pengguna dari locals yang disimpan oleh AuthMiddleware
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "Format token tidak valid (Bearer token diperlukan)", nil)
+		}
+
+		tokenString := parts[1]
+
+		claims, err := utils.ValidateJWTToken(tokenString)
+		if err != nil {
+			return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "Token tidak valid", err.Error())
+		}
+
+		// Menyimpan klaim pengguna ke dalam context Fiber
+		c.Locals("userID", claims.UserID)
+		c.Locals("userEmail", claims.Email)
+		c.Locals("userRoles", claims.Roles)
+
+		// Ambil peran pengguna dari locals yang disimpan
 		userRoles, ok := c.Locals("userRoles").(map[string][]string)
 		if !ok {
-			return utils.SendErrorResponse(c, fiber.StatusForbidden, "Informasi peran tidak tersedia", nil)
+			// Ini terjadi jika token tidak memiliki data peran yang valid.
+			return utils.SendErrorResponse(c, fiber.StatusForbidden, "Informasi peran tidak tersedia di dalam token", nil)
 		}
 
-		// Periksa apakah pengguna memiliki peran 'role_admin' di bisnis manapun
+		// Periksa apakah pengguna memiliki peran 'super_admin'
 		hasAdminRole := false
 		for _, roles := range userRoles {
 			for _, role := range roles {
-				if role == "role_admin" {
+				if role == "super_admin" { // MEMPERBAIKI: Memeriksa nama peran yang benar
 					hasAdminRole = true
 					break
 				}

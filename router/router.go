@@ -11,6 +11,9 @@ func SetupRoutes(app *fiber.App, dbClient *mongo.Client) {
 	api := app.Group("/api/v1")
 
 	// Mendaftarkan rute untuk setiap entitas
+	SetupAuthRoutes(api, dbClient)
+	SetupUserRoutes(api, dbClient)
+	SetupSuperAdminRoutes(api, dbClient)
 	SetupBusinessRoutes(api, dbClient)
 	SetupChannelRoutes(api, dbClient)
 	SetupChannelCategoryRoutes(api, dbClient)
