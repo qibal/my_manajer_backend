@@ -46,6 +46,7 @@ func NewChannelHandler(repo repository.ChannelRepository, activityLogService ser
 // @Tags Channels
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
 // @Param channel body dto.ChannelCreateRequest true "Channel object to be created"
 // @Success 201 {object} utils.APIResponse{data=dto.ChannelResponse} "Successfully created channel"
 // @Failure 400 {object} utils.APIResponse "Bad Request - Invalid input"
@@ -119,6 +120,7 @@ func (h *channelHandlerImpl) CreateChannel(c *fiber.Ctx) error {
 // @Description Retrieves a single channel by its ID.
 // @Tags Channels
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Channel ID"
 // @Success 200 {object} utils.APIResponse{data=dto.ChannelResponse} "Successfully retrieved channel"
 // @Failure 400 {object} utils.APIResponse "Bad Request - Invalid ID"
@@ -170,6 +172,7 @@ func (h *channelHandlerImpl) GetChannelByID(c *fiber.Ctx) error {
 // @Description Retrieves a list of all channels.
 // @Tags Channels
 // @Produce json
+// @Security ApiKeyAuth
 // @Success 200 {object} utils.APIResponse{data=[]dto.ChannelResponse} "Successfully retrieved all channels"
 // @Failure 500 {object} utils.APIResponse "Internal Server Error"
 // @Router /channels [get]
@@ -209,6 +212,7 @@ func (h *channelHandlerImpl) GetAllChannels(c *fiber.Ctx) error {
 // @Tags Channels
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Channel ID"
 // @Param channel body dto.ChannelUpdateRequest true "Channel object to be updated"
 // @Success 200 {object} utils.APIResponse{data=dto.ChannelResponse} "Successfully updated channel"
@@ -309,6 +313,7 @@ func (h *channelHandlerImpl) UpdateChannel(c *fiber.Ctx) error {
 // @Description Deletes a channel by its ID.
 // @Tags Channels
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Channel ID"
 // @Success 200 {object} utils.APIResponse "Successfully deleted channel"
 // @Failure 400 {object} utils.APIResponse "Bad Request - Invalid ID"
@@ -364,6 +369,7 @@ func (h *channelHandlerImpl) DeleteChannel(c *fiber.Ctx) error {
 // @Description Retrieves a list of all channels for a specific business.
 // @Tags Channels
 // @Produce json
+// @Security ApiKeyAuth
 // @Param businessId path string true "Business ID"
 // @Success 200 {object} utils.APIResponse{data=[]dto.ChannelResponse} "Successfully retrieved all channels by businessId"
 // @Failure 400 {object} utils.APIResponse "Bad Request - Invalid businessId"

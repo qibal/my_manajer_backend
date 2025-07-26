@@ -91,6 +91,11 @@ const docTemplate = `{
         },
         "/businesses": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves a list of all businesses.",
                 "produces": [
                     "application/json"
@@ -130,6 +135,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Creates a new business with the provided details.",
                 "consumes": [
                     "application/json"
@@ -188,6 +198,11 @@ const docTemplate = `{
         },
         "/businesses/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves a single business by its ID.",
                 "produces": [
                     "application/json"
@@ -239,6 +254,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Updates an existing business with the provided details.",
                 "consumes": [
                     "application/json"
@@ -308,6 +328,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Deletes a business by its ID.",
                 "produces": [
                     "application/json"
@@ -349,6 +374,11 @@ const docTemplate = `{
         },
         "/channel-categories": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves a list of all channel categories.",
                 "produces": [
                     "application/json"
@@ -388,6 +418,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Creates a new channel category with the provided details.",
                 "consumes": [
                     "application/json"
@@ -446,6 +481,11 @@ const docTemplate = `{
         },
         "/channel-categories/business/{businessId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves a list of all channel categories for a specific business.",
                 "produces": [
                     "application/json"
@@ -502,6 +542,11 @@ const docTemplate = `{
         },
         "/channel-categories/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves a single channel category by its ID.",
                 "produces": [
                     "application/json"
@@ -559,6 +604,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Updates an existing channel category with the provided details.",
                 "consumes": [
                     "application/json"
@@ -628,6 +678,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Deletes a channel category by its ID.",
                 "produces": [
                     "application/json"
@@ -675,6 +730,11 @@ const docTemplate = `{
         },
         "/channels": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves a list of all channels.",
                 "produces": [
                     "application/json"
@@ -714,6 +774,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Creates a new channel with the provided details.",
                 "consumes": [
                     "application/json"
@@ -772,6 +837,11 @@ const docTemplate = `{
         },
         "/channels/business/{businessId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves a list of all channels for a specific business.",
                 "produces": [
                     "application/json"
@@ -828,6 +898,11 @@ const docTemplate = `{
         },
         "/channels/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves a single channel by its ID.",
                 "produces": [
                     "application/json"
@@ -885,6 +960,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Updates an existing channel with the provided details.",
                 "consumes": [
                     "application/json"
@@ -954,6 +1034,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Deletes a channel by its ID.",
                 "produces": [
                     "application/json"
@@ -2098,6 +2183,11 @@ const docTemplate = `{
         },
         "/roles": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all roles.",
                 "produces": [
                     "application/json"
@@ -2137,6 +2227,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new role with specified name, business ID, and permissions.",
                 "consumes": [
                     "application/json"
@@ -2195,6 +2290,11 @@ const docTemplate = `{
         },
         "/roles/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get role details by its unique ID.",
                 "produces": [
                     "application/json"
@@ -2252,6 +2352,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update an existing role's name and permissions by ID.",
                 "consumes": [
                     "application/json"
@@ -2309,6 +2414,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete a role by its unique ID.",
                 "produces": [
                     "application/json"
@@ -3464,7 +3574,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
-	Schemes:          []string{},
+	Schemes:          []string{"http", "https"},
 	Title:            "My Manajer API",
 	Description:      "This is a sample server for My Manajer API.",
 	InfoInstanceName: "swagger",

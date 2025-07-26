@@ -46,6 +46,7 @@ func NewChannelCategoryHandler(repo repository.ChannelCategoryRepository, activi
 // @Tags Channel Categories
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
 // @Param category body dto.ChannelCategoryCreateRequest true "Channel category object to be created"
 // @Success 201 {object} utils.APIResponse{data=dto.ChannelCategoryResponse} "Successfully created channel category"
 // @Failure 400 {object} utils.APIResponse "Bad Request - Invalid input"
@@ -100,6 +101,7 @@ func (h *channelCategoryHandlerImpl) CreateChannelCategory(c *fiber.Ctx) error {
 // @Description Retrieves a single channel category by its ID.
 // @Tags Channel Categories
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Channel Category ID"
 // @Success 200 {object} utils.APIResponse{data=dto.ChannelCategoryResponse} "Successfully retrieved channel category"
 // @Failure 400 {object} utils.APIResponse "Bad Request - Invalid ID"
@@ -145,6 +147,7 @@ func (h *channelCategoryHandlerImpl) GetChannelCategoryByID(c *fiber.Ctx) error 
 // @Description Retrieves a list of all channel categories.
 // @Tags Channel Categories
 // @Produce json
+// @Security ApiKeyAuth
 // @Success 200 {object} utils.APIResponse{data=[]dto.ChannelCategoryResponse} "Successfully retrieved all channel categories"
 // @Failure 500 {object} utils.APIResponse "Internal Server Error"
 // @Router /channel-categories [get]
@@ -176,6 +179,7 @@ func (h *channelCategoryHandlerImpl) GetAllChannelCategories(c *fiber.Ctx) error
 // @Description Retrieves a list of all channel categories for a specific business.
 // @Tags Channel Categories
 // @Produce json
+// @Security ApiKeyAuth
 // @Param businessId path string true "Business ID"
 // @Success 200 {object} utils.APIResponse{data=[]dto.ChannelCategoryResponse} "Successfully retrieved all channel categories by businessId"
 // @Failure 400 {object} utils.APIResponse "Bad Request - Invalid businessId"
@@ -220,6 +224,7 @@ func (h *channelCategoryHandlerImpl) GetChannelCategoriesByBusinessID(c *fiber.C
 // @Tags Channel Categories
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Channel Category ID"
 // @Param category body dto.ChannelCategoryUpdateRequest true "Channel category object to be updated"
 // @Success 200 {object} utils.APIResponse{data=dto.ChannelCategoryResponse} "Successfully updated channel category"
@@ -295,6 +300,7 @@ func (h *channelCategoryHandlerImpl) UpdateChannelCategory(c *fiber.Ctx) error {
 // @Description Deletes a channel category by its ID.
 // @Tags Channel Categories
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Channel Category ID"
 // @Success 200 {object} utils.APIResponse "Successfully deleted channel category"
 // @Failure 400 {object} utils.APIResponse "Bad Request - Invalid ID"

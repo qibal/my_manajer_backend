@@ -45,6 +45,7 @@ func NewBusinessHandler(repo repository.BusinessRepository, activityLogService s
 // @Tags Businesses
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
 // @Param business body dto.BusinessCreateRequest true "Business object to be created"
 // @Success 201 {object} utils.APIResponse{data=dto.BusinessResponse} "Successfully created business"
 // @Failure 400 {object} utils.APIResponse "Bad Request - Invalid input"
@@ -107,6 +108,7 @@ func (h *businessHandlerImpl) CreateBusiness(c *fiber.Ctx) error {
 // @Description Retrieves a single business by its ID.
 // @Tags Businesses
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Business ID"
 // @Success 200 {object} utils.APIResponse{data=dto.BusinessResponse} "Successfully retrieved business"
 // @Failure 404 {object} utils.APIResponse "Not Found - Business not found"
@@ -157,6 +159,7 @@ func (h *businessHandlerImpl) GetBusinessByID(c *fiber.Ctx) error {
 // @Description Retrieves a list of all businesses.
 // @Tags Businesses
 // @Produce json
+// @Security ApiKeyAuth
 // @Success 200 {object} utils.APIResponse{data=[]dto.BusinessResponse} "Successfully retrieved all businesses"
 // @Failure 500 {object} utils.APIResponse "Internal Server Error"
 // @Router /businesses [get]
@@ -195,6 +198,7 @@ func (h *businessHandlerImpl) GetAllBusinesses(c *fiber.Ctx) error {
 // @Tags Businesses
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Business ID"
 // @Param business body dto.BusinessUpdateRequest true "Business object to be updated"
 // @Success 200 {object} utils.APIResponse{data=dto.BusinessResponse} "Successfully updated business"
@@ -284,6 +288,7 @@ func (h *businessHandlerImpl) UpdateBusiness(c *fiber.Ctx) error {
 // @Description Deletes a business by its ID.
 // @Tags Businesses
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Business ID"
 // @Success 200 {object} utils.APIResponse "Successfully deleted business"
 // @Failure 404 {object} utils.APIResponse "Not Found - Business not found"

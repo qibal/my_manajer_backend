@@ -34,6 +34,7 @@ func NewRoleHandler(repo *repository.RoleRepository, activityLogService service.
 // @Tags Roles
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
 // @Param role body dto.CreateRoleRequest true "Role creation request"
 // @Success 201 {object} utils.APIResponse{data=dto.RoleResponse} "Role created successfully"
 // @Failure 400 {object} utils.APIResponse "Bad Request - Invalid input"
@@ -89,6 +90,7 @@ func (h *RoleHandler) CreateRole(c *fiber.Ctx) error {
 // @Description Get role details by its unique ID.
 // @Tags Roles
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Role ID"
 // @Success 200 {object} utils.APIResponse{data=dto.RoleResponse} "Role retrieved successfully"
 // @Failure 400 {object} utils.APIResponse "Bad Request - Invalid ID"
@@ -130,6 +132,7 @@ func (h *RoleHandler) GetRoleByID(c *fiber.Ctx) error {
 // @Description Get a list of all roles.
 // @Tags Roles
 // @Produce json
+// @Security ApiKeyAuth
 // @Success 200 {object} utils.APIResponse{data=[]dto.RoleResponse} "Roles retrieved successfully"
 // @Failure 500 {object} utils.APIResponse "Internal Server Error"
 // @Router /roles [get]
@@ -161,6 +164,7 @@ func (h *RoleHandler) GetAllRoles(c *fiber.Ctx) error {
 // @Tags Roles
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Role ID"
 // @Param role body dto.UpdateRoleRequest true "Role update request"
 // @Success 200 {object} utils.APIResponse "Role updated successfully"
@@ -231,6 +235,7 @@ func (h *RoleHandler) UpdateRole(c *fiber.Ctx) error {
 // @Description Delete a role by its unique ID.
 // @Tags Roles
 // @Produce json
+// @Security ApiKeyAuth
 // @Param id path string true "Role ID"
 // @Success 204 {object} nil "Role deleted successfully"
 // @Failure 400 {object} utils.APIResponse "Bad Request - Invalid ID"

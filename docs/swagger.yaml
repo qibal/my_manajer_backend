@@ -556,6 +556,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Get all businesses
       tags:
       - Businesses
@@ -590,6 +592,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Create a new business
       tags:
       - Businesses
@@ -617,6 +621,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Delete a business by ID
       tags:
       - Businesses
@@ -648,6 +654,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Get a business by ID
       tags:
       - Businesses
@@ -691,6 +699,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Update a business by ID
       tags:
       - Businesses
@@ -715,6 +725,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Get all channel categories
       tags:
       - Channel Categories
@@ -749,6 +761,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Create a new channel category
       tags:
       - Channel Categories
@@ -780,6 +794,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Delete a channel category by ID
       tags:
       - Channel Categories
@@ -815,6 +831,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Get a channel category by ID
       tags:
       - Channel Categories
@@ -858,6 +876,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Update a channel category by ID
       tags:
       - Channel Categories
@@ -892,6 +912,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Get all channel categories by businessId
       tags:
       - Channel Categories
@@ -916,6 +938,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Get all channels
       tags:
       - Channels
@@ -950,6 +974,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Create a new channel
       tags:
       - Channels
@@ -981,6 +1007,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Delete a channel by ID
       tags:
       - Channels
@@ -1016,6 +1044,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Get a channel by ID
       tags:
       - Channels
@@ -1059,6 +1089,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Update a channel by ID
       tags:
       - Channels
@@ -1093,6 +1125,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Get all channels by businessId
       tags:
       - Channels
@@ -1801,6 +1835,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Get all roles
       tags:
       - Roles
@@ -1835,6 +1871,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Create a new role
       tags:
       - Roles
@@ -1864,6 +1902,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Delete a role
       tags:
       - Roles
@@ -1899,6 +1939,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Get role by ID
       tags:
       - Roles
@@ -1937,6 +1979,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Update a role
       tags:
       - Roles
@@ -2180,6 +2224,9 @@ paths:
       summary: Register a new user
       tags:
       - Users
+schemes:
+- http
+- https
 securityDefinitions:
   ApiKeyAuth:
     description: '"Type ''Bearer'' followed by a space and JWT token."'
