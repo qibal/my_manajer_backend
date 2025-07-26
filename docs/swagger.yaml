@@ -482,7 +482,7 @@ definitions:
       success:
         type: boolean
     type: object
-host: localhost:8080
+host: my-manajer-production.up.railway.app
 info:
   contact:
     email: support@swagger.io
