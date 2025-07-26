@@ -74,7 +74,23 @@ func (h *messageHandlerImpl) HandleWebSocketMessage(c *websocket.Conn) {
 	log.Printf("Client connected to channel %s: %s\n", channelID, c.LocalAddr().String())
 
 	// Send a confirmation to the client that they joined the channel
-	c.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Joined channel: %s", channelID)))
+	// c.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Joined channel: %s", channelID)))
+
+	// Periksa hasil autentikasi dari middleware
+	authFailed, ok := c.Locals("authFailed").(bool)
+	if ok && authFailed {
+		authError, _ := c.Locals("authError").(string)
+		if authError == "" {
+			authError = "Autentikasi gagal"
+		}
+		log.Printf("WebSocket authentication failed for channel %s: %s\n", channelID, authError)
+		// Kirim pesan error melalui WebSocket, lalu tutup koneksi
+		c.WriteJSON(map[string]interface{}{"type": "error", "payload": authError})
+		return // Penting: Jangan lanjutkan loop pesan, langsung keluar dari handler
+	}
+
+	// Kirim konfirmasi hanya jika autentikasi berhasil
+	c.WriteJSON(map[string]interface{}{"type": "server_log", "payload": fmt.Sprintf("Joined channel: %s", channelID)})
 
 	// Loop to read messages from the client
 	for {
@@ -167,9 +183,16 @@ func (h *messageHandlerImpl) handleCreateMessage(c *websocket.Conn, channelIDStr
 		return
 	}
 
-	userID, err := primitive.ObjectIDFromHex(req.UserID)
+	// Ambil userID dari locals yang sudah diautentikasi, JANGAN PERCAYA PAYLOAD
+	userIDStr, ok := c.Locals("userID").(string)
+	if !ok || userIDStr == "" {
+		logAndEmitErrorWS(c, "User ID tidak ditemukan di koneksi terautentikasi", nil)
+		return
+	}
+
+	userID, err := primitive.ObjectIDFromHex(userIDStr)
 	if err != nil {
-		logAndEmitErrorWS(c, "Invalid user ID", err)
+		logAndEmitErrorWS(c, "Invalid user ID dari token", err)
 		return
 	}
 
@@ -289,6 +312,13 @@ func (h *messageHandlerImpl) handleUpdateMessage(c *websocket.Conn, channelIDStr
 	messageIDStr := updatePayload.ID
 	req := updatePayload.MessageUpdateRequest
 
+	// Ambil userID dari locals
+	userIDStr, ok := c.Locals("userID").(string)
+	if !ok || userIDStr == "" {
+		logAndEmitErrorWS(c, "User ID tidak ditemukan di koneksi terautentikasi", nil)
+		return
+	}
+
 	msgObjectID, err := primitive.ObjectIDFromHex(messageIDStr)
 	if err != nil {
 		logAndEmitErrorWS(c, "Invalid message ID for update", err)
@@ -329,10 +359,26 @@ func (h *messageHandlerImpl) handleUpdateMessage(c *websocket.Conn, channelIDStr
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	// Buat context baru untuk operasi update
+	updateCtx, updateCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer updateCancel()
 
-	updatedMessage, err := h.repo.UpdateMessage(ctx, msgObjectID, updateMap)
+	// Cek otorisasi: apakah user yang request adalah pemilik pesan?
+	existingMessage, err := h.repo.GetMessageByID(updateCtx, msgObjectID)
+	if err != nil {
+		logAndEmitErrorWS(c, "Gagal memeriksa pesan untuk otorisasi update", err)
+		return
+	}
+	if existingMessage == nil {
+		logAndEmitErrorWS(c, "Pesan tidak ditemukan untuk diupdate", nil)
+		return
+	}
+	if existingMessage.UserID.Hex() != userIDStr {
+		logAndEmitErrorWS(c, "Tidak diizinkan: Anda bukan pemilik pesan ini", nil)
+		return
+	}
+
+	updatedMessage, err := h.repo.UpdateMessage(updateCtx, msgObjectID, updateMap)
 	if err != nil {
 		utils.LogError(err, "Failed to update message in database")
 		logAndEmitErrorWS(c, "Failed to update message", err)
@@ -372,6 +418,13 @@ func (h *messageHandlerImpl) handleDeleteMessage(c *websocket.Conn, channelIDStr
 		return
 	}
 
+	// Ambil userID dari locals
+	userIDStr, ok := c.Locals("userID").(string)
+	if !ok || userIDStr == "" {
+		logAndEmitErrorWS(c, "User ID tidak ditemukan di koneksi terautentikasi", nil)
+		return
+	}
+
 	msgObjectID, err := primitive.ObjectIDFromHex(req.ID)
 	if err != nil {
 		logAndEmitErrorWS(c, "Invalid message ID for delete", err)
@@ -381,7 +434,26 @@ func (h *messageHandlerImpl) handleDeleteMessage(c *websocket.Conn, channelIDStr
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := h.repo.DeleteMessage(ctx, msgObjectID); err != nil {
+	// Cek otorisasi: apakah user yang request adalah pemilik pesan?
+	existingMessage, err := h.repo.GetMessageByID(ctx, msgObjectID)
+	if err != nil {
+		logAndEmitErrorWS(c, "Gagal memeriksa pesan untuk otorisasi delete", err)
+		return
+	}
+	if existingMessage == nil {
+		logAndEmitErrorWS(c, "Pesan tidak ditemukan untuk dihapus", nil)
+		return
+	}
+	if existingMessage.UserID.Hex() != userIDStr {
+		logAndEmitErrorWS(c, "Tidak diizinkan: Anda bukan pemilik pesan ini", nil)
+		return
+	}
+
+	// Buat context baru untuk operasi delete
+	deleteCtx, deleteCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer deleteCancel()
+
+	if err := h.repo.DeleteMessage(deleteCtx, msgObjectID); err != nil {
 		if err == mongo.ErrNoDocuments {
 			logAndEmitErrorWS(c, "Message not found for deletion", nil)
 		} else {

@@ -192,6 +192,151 @@ definitions:
         example: superadmin
         type: string
     type: object
+  dto.DatabaseColumnRequest:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      options:
+        description: Hanya untuk tipe "select"
+        items:
+          type: string
+        type: array
+      order:
+        type: integer
+      type:
+        description: Tipe kolom yang diizinkan
+        enum:
+        - date
+        - text
+        - select
+        - boolean
+        - number
+        type: string
+    required:
+    - name
+    - type
+    type: object
+  dto.DatabaseColumnResponse:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      options:
+        items:
+          $ref: '#/definitions/dto.SelectOptionResponse'
+        type: array
+      order:
+        type: integer
+      type:
+        type: string
+    type: object
+  dto.DatabaseColumnUpdateRequest:
+    properties:
+      name:
+        minLength: 1
+        type: string
+      options:
+        description: Untuk update massal atau ganti tipe
+        items:
+          type: string
+        type: array
+      order:
+        type: integer
+      type:
+        enum:
+        - date
+        - text
+        - select
+        - boolean
+        - number
+        type: string
+    type: object
+  dto.DatabaseCreateRequest:
+    properties:
+      authorId:
+        description: ID user yang membuat database
+        type: string
+      channelId:
+        description: ID channel tempat database berada
+        type: string
+      columns:
+        description: Minimal satu kolom, dengan validasi rekursif
+        items:
+          $ref: '#/definitions/dto.DatabaseColumnRequest'
+        minItems: 1
+        type: array
+      title:
+        minLength: 3
+        type: string
+    required:
+    - authorId
+    - channelId
+    - columns
+    - title
+    type: object
+  dto.DatabaseResponse:
+    properties:
+      authorId:
+        type: string
+      channelId:
+        type: string
+      columns:
+        items:
+          $ref: '#/definitions/dto.DatabaseColumnResponse'
+        type: array
+      createdAt:
+        type: string
+      id:
+        type: string
+      rows:
+        items:
+          $ref: '#/definitions/dto.DatabaseRowResponse'
+        type: array
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  dto.DatabaseRowRequest:
+    properties:
+      id:
+        type: string
+      values:
+        $ref: '#/definitions/dto.DatabaseRowValueRequest'
+    required:
+    - values
+    type: object
+  dto.DatabaseRowResponse:
+    properties:
+      id:
+        type: string
+      values:
+        $ref: '#/definitions/dto.DatabaseRowValueResponse'
+    type: object
+  dto.DatabaseRowValueRequest:
+    additionalProperties: true
+    type: object
+  dto.DatabaseRowValueResponse:
+    additionalProperties: true
+    type: object
+  dto.DatabaseUpdateRequest:
+    properties:
+      columns:
+        items:
+          $ref: '#/definitions/dto.DatabaseColumnRequest'
+        minItems: 1
+        type: array
+      rows:
+        items:
+          $ref: '#/definitions/dto.DatabaseRowRequest'
+        type: array
+      title:
+        minLength: 3
+        type: string
+    type: object
   dto.LoginRequest:
     properties:
       email:
@@ -205,29 +350,7 @@ definitions:
     type: object
   dto.LoginResponse:
     properties:
-      avatar:
-        type: string
-      businessIds:
-        items:
-          type: string
-        type: array
-      createdAt:
-        type: string
-      email:
-        type: string
-      id:
-        type: string
-      isActive:
-        type: boolean
-      roles:
-        additionalProperties:
-          items:
-            type: string
-          type: array
-        type: object
       token:
-        type: string
-      username:
         type: string
     type: object
   dto.RegisterUserRequest:
@@ -262,6 +385,34 @@ definitions:
             type: string
           type: array
         type: object
+    type: object
+  dto.SelectOptionRequest:
+    properties:
+      order:
+        type: integer
+      value:
+        type: string
+    required:
+    - value
+    type: object
+  dto.SelectOptionResponse:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      order:
+        type: integer
+      value:
+        type: string
+    type: object
+  dto.SelectOptionUpdateRequest:
+    properties:
+      order:
+        type: integer
+      value:
+        minLength: 1
+        type: string
     type: object
   dto.UpdateRoleRequest:
     properties:
@@ -945,6 +1096,690 @@ paths:
       summary: Get all channels by businessId
       tags:
       - Channels
+  /databases:
+    post:
+      consumes:
+      - application/json
+      description: Create a new custom database for a specific channel.
+      parameters:
+      - description: Database Creation Details
+        in: body
+        name: database
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DatabaseCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Database created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DatabaseResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input or validation error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new database
+      tags:
+      - Databases
+  /databases/{id}:
+    delete:
+      description: Delete a custom database by its ID. Only author or authorized users
+        can delete.
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Database deleted successfully
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "400":
+          description: Bad Request - Invalid ID format
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized to delete this database
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Database not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a database
+      tags:
+      - Databases
+    get:
+      description: Get a specific custom database by its ID.
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Database retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DatabaseResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid ID format
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized to access this database
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Database not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get database by ID
+      tags:
+      - Databases
+    put:
+      consumes:
+      - application/json
+      description: Update an existing custom database by its ID. Only author or authorized
+        users can update.
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Database Update Details
+        in: body
+        name: database
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DatabaseUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Database updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DatabaseResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input or validation error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized to update this database
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Database not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a database
+      tags:
+      - Databases
+  /databases/{id}/columns/{columnId}:
+    delete:
+      description: Delete a specific column from an existing custom database.
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Column deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DatabaseResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid ID format
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized to delete columns from this
+            database
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Database or Column not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a column from database
+      tags:
+      - Databases
+    put:
+      consumes:
+      - application/json
+      description: Update an existing column within a custom database.
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: string
+      - description: Updated Column Details
+        in: body
+        name: column
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DatabaseColumnUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Column updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DatabaseResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input or validation error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized to update columns in this database
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Database or Column not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a column in database
+      tags:
+      - Databases
+  /databases/{id}/columns/{columnId}/options:
+    post:
+      consumes:
+      - application/json
+      description: Add a new select option to a specific 'select' type column within
+        a custom database.
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: string
+      - description: New Select Option Details
+        in: body
+        name: option
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SelectOptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Select option added successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DatabaseResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input or validation error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized to modify this database
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Database or Column not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Add select option to column
+      tags:
+      - Databases
+  /databases/{id}/columns/{columnId}/options/{optionId}:
+    delete:
+      description: Delete a specific select option from a 'select' type column within
+        a custom database.
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: string
+      - description: Option ID
+        in: path
+        name: optionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Select option deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DatabaseResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid ID format
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized to modify this database
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Database, Column, or Option not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete select option from column
+      tags:
+      - Databases
+    put:
+      consumes:
+      - application/json
+      description: Update an existing select option within a specific 'select' type
+        column in a custom database.
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: string
+      - description: Option ID
+        in: path
+        name: optionId
+        required: true
+        type: string
+      - description: Updated Select Option Details
+        in: body
+        name: option
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SelectOptionUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Select option updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DatabaseResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input or validation error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized to modify this database
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Database, Column, or Option not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update select option in column
+      tags:
+      - Databases
+  /databases/{id}/rows:
+    post:
+      consumes:
+      - application/json
+      description: Add a new data row to an existing custom database.
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New Row Details
+        in: body
+        name: row
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DatabaseRowRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Row added successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DatabaseResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input or validation error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized to add rows to this database
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Database not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Add a row to database
+      tags:
+      - Databases
+  /databases/{id}/rows/{rowId}:
+    delete:
+      description: Delete a specific data row from an existing custom database.
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Row ID
+        in: path
+        name: rowId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Row deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DatabaseResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid ID format
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized to delete rows from this database
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Database or Row not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a row from database
+      tags:
+      - Databases
+    put:
+      consumes:
+      - application/json
+      description: Update an existing data row within a custom database.
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Row ID
+        in: path
+        name: rowId
+        required: true
+        type: string
+      - description: Updated Row Details
+        in: body
+        name: row
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DatabaseRowRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Row updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DatabaseResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid input or validation error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized to update rows in this database
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: Not Found - Database or Row not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a row in database
+      tags:
+      - Databases
+  /databases/channel/{channelId}:
+    get:
+      description: Get a list of custom databases for a given channel ID.
+      parameters:
+      - description: Channel ID
+        in: path
+        name: channelId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Databases retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.DatabaseResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request - Invalid Channel ID format
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Token not provided or invalid
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "403":
+          description: Forbidden - User not authorized to access this channel's databases
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get databases by channel ID
+      tags:
+      - Databases
   /roles:
     get:
       description: Get a list of all roles.
@@ -1206,6 +2041,48 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Delete a user
+      tags:
+      - Users
+    get:
+      description: Retrieves a single user's details by their ID. This endpoint requires
+        authentication.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved user
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.UserResponse'
+              type: object
+        "400":
+          description: Bad Request - Invalid ID
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "401":
+          description: Unauthorized - Authentication required
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIResponse'
+      security:
+      - ApiKeyAuth // Menambahkan ini: []
+      summary: Get user by ID
       tags:
       - Users
     put:

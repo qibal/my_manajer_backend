@@ -2,27 +2,25 @@ package utils
 
 import (
 	"fmt"
-	"log" // Mengimpor paket log standar
 	"os"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 // JWTSecretKey adalah kunci rahasia untuk menandatangani JWT.
 // Seharusnya dimuat dari variabel lingkungan atau konfigurasi yang aman.
-var JWTSecretKey = getJWTSecretKey() // Mengubah inisialisasi
+var JWTSecretKey []byte
 
 // getJWTSecretKey mengambil kunci rahasia JWT dari variabel lingkungan.
 // Jika tidak ditemukan, akan menggunakan kunci default dan mencatat peringatan.
-func getJWTSecretKey() []byte {
+func GetJWTSecretKey() ([]byte, error) {
 	secret := os.Getenv("JWT_SECRET_KEY")
 	if secret == "" {
-		// Menggunakan log standar untuk menghindari masalah urutan inisialisasi
-		log.Println("WARNING: Variabel lingkungan JWT_SECRET_KEY tidak ditemukan. Menggunakan kunci default yang tidak aman.")
-		return []byte("supersecretjwtkey") // Kunci default yang tidak aman, hanya untuk pengembangan/contoh
+		return nil, fmt.Errorf("JWT_SECRET_KEY tidak ditemukan di environment. Aplikasi tidak bisa berjalan tanpa secret ini")
 	}
-	return []byte(secret)
+	return []byte(secret), nil
 }
 
 // Claims adalah struktur kustom yang akan digunakan untuk JWT.
@@ -76,4 +74,19 @@ func ValidateJWTToken(tokenString string) (*Claims, error) {
 	}
 
 	return claims, nil
+}
+
+// GetUserIDFromToken mengambil ID pengguna dari token JWT dalam konteks Fiber.
+func GetUserIDFromToken(c *fiber.Ctx) (string, error) {
+	user := c.Locals("user").(*jwt.Token)
+	if user == nil {
+		return "", fmt.Errorf("token pengguna tidak ditemukan dalam konteks")
+	}
+
+	claims, ok := user.Claims.(*jwt.RegisteredClaims)
+	if !ok {
+		return "", fmt.Errorf("klaim token tidak valid")
+	}
+
+	return claims.Subject, nil
 }

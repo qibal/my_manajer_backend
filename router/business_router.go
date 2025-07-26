@@ -4,6 +4,7 @@ import (
 	"backend_my_manajer/handler"
 	"backend_my_manajer/middleware" // Mengimpor middleware
 	"backend_my_manajer/repository"
+	"backend_my_manajer/service"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,7 +15,9 @@ import (
 func SetupBusinessRoutes(router fiber.Router, dbClient *mongo.Client) {
 	// Inisialisasi repository dan handler untuk Business
 	businessRepo := repository.NewBusinessRepository(dbClient)
-	businessHandler := handler.NewBusinessHandler(businessRepo)
+	activityLogRepo := repository.NewActivityLogRepository(dbClient)
+	activityLogService := service.NewActivityLogService(activityLogRepo)
+	businessHandler := handler.NewBusinessHandler(businessRepo, activityLogService)
 
 	// Menerapkan middleware autentikasi ke semua rute bisnis
 	businessRoutes := router.Group("/businesses", middleware.AuthMiddleware())

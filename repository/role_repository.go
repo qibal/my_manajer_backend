@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"backend_my_manajer/config"
 	"backend_my_manajer/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,7 +17,7 @@ type RoleRepository struct {
 
 func NewRoleRepository(dbClient *mongo.Client) *RoleRepository {
 	return &RoleRepository{
-		rolesCollection: dbClient.Database("mydatabase").Collection("roles"),
+		rolesCollection: dbClient.Database(config.DBConfig.DatabaseName).Collection(config.DBConfig.Collections["Roles"]), // Mengambil nama koleksi dari config
 	}
 }
 

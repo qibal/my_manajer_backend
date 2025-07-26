@@ -2,11 +2,13 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"backend_my_manajer/dto"
 	"backend_my_manajer/model"
 	"backend_my_manajer/repository"
+	"backend_my_manajer/service"
 	"backend_my_manajer/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,15 +22,20 @@ type UserHandler interface {
 	GetAllUsers(c *fiber.Ctx) error
 	UpdateUser(c *fiber.Ctx) error
 	DeleteUser(c *fiber.Ctx) error
+	GetUserByID(c *fiber.Ctx) error
 }
 
 type userHandlerImpl struct {
-	userRepo repository.UserRepository
+	userRepo           repository.UserRepository
+	activityLogService service.ActivityLogService
 }
 
 // NewUserHandler membuat instance baru dari UserHandler.
-func NewUserHandler(userRepo repository.UserRepository) UserHandler {
-	return &userHandlerImpl{userRepo: userRepo}
+func NewUserHandler(userRepo repository.UserRepository, activityLogService service.ActivityLogService) UserHandler {
+	return &userHandlerImpl{
+		userRepo:           userRepo,
+		activityLogService: activityLogService,
+	}
 }
 
 // RegisterUser registers a new user (admin only).
@@ -49,6 +56,12 @@ func (h *userHandlerImpl) RegisterUser(c *fiber.Ctx) error {
 	var req dto.RegisterUserRequest
 	if err := c.BodyParser(&req); err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
+	}
+
+	// Admin yang melakukan registrasi
+	adminID, ok := c.Locals("userID").(string)
+	if !ok || adminID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "Admin User ID not found in token", nil)
 	}
 
 	// Validasi dasar
@@ -106,6 +119,9 @@ func (h *userHandlerImpl) RegisterUser(c *fiber.Ctx) error {
 	if err := h.userRepo.CreateUser(ctx, newUser); err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to create user", err.Error())
 	}
+
+	// Log activity
+	go h.activityLogService.LogActivity(context.Background(), adminID, fmt.Sprintf("Registered new user: %s (ID: %s)", newUser.Username, newUser.ID.Hex()), c.Method(), c.Path(), fiber.StatusCreated, c.IP())
 
 	return utils.SendSuccessResponse(c, fiber.StatusCreated, "User registered successfully", dto.UserResponse{
 		ID:       newUser.ID.Hex(),
@@ -175,6 +191,11 @@ func (h *userHandlerImpl) UpdateUser(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid user ID", err.Error())
 	}
 
+	adminID, ok := c.Locals("userID").(string)
+	if !ok || adminID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "Admin User ID not found in token", nil)
+	}
+
 	var req dto.UpdateUserRequest
 	if err := c.BodyParser(&req); err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
@@ -217,6 +238,9 @@ func (h *userHandlerImpl) UpdateUser(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusNotFound, "User not found", nil)
 	}
 
+	// Log activity
+	go h.activityLogService.LogActivity(context.Background(), adminID, fmt.Sprintf("Updated user: %s (ID: %s)", updatedUser.Username, updatedUser.ID.Hex()), c.Method(), c.Path(), fiber.StatusOK, c.IP())
+
 	return utils.SendSuccessResponse(c, fiber.StatusOK, "User updated successfully", dto.UserResponse{
 		ID:          updatedUser.ID.Hex(),
 		Username:    updatedUser.Username,
@@ -249,12 +273,70 @@ func (h *userHandlerImpl) DeleteUser(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid user ID", err.Error())
 	}
 
+	adminID, ok := c.Locals("userID").(string)
+	if !ok || adminID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "Admin User ID not found in token", nil)
+	}
+
 	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
+
+	// Get user before deleting to log their username
+	userToDelete, err := h.userRepo.FindUserByID(ctx, objectID)
+	if err != nil || userToDelete == nil {
+		return utils.SendErrorResponse(c, fiber.StatusNotFound, "User not found", err)
+	}
 
 	if err := h.userRepo.DeleteUser(ctx, objectID); err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to delete user", err.Error())
 	}
 
+	// Log activity
+	go h.activityLogService.LogActivity(context.Background(), adminID, fmt.Sprintf("Deleted user: %s (ID: %s)", userToDelete.Username, userToDelete.ID.Hex()), c.Method(), c.Path(), fiber.StatusOK, c.IP())
+
 	return utils.SendSuccessResponse(c, fiber.StatusOK, "User deleted successfully", nil)
+}
+
+// GetUserByID retrieves a user by ID (requires authentication).
+// @Summary Get user by ID
+// @Description Retrieves a single user's details by their ID. This endpoint requires authentication.
+// @Tags Users
+// @Produce json
+// @Security ApiKeyAuth // Menambahkan ini
+// @Param id path string true "User ID"
+// @Success 200 {object} utils.APIResponse{data=dto.UserResponse} "Successfully retrieved user"
+// @Failure 400 {object} utils.APIResponse "Bad Request - Invalid ID"
+// @Failure 401 {object} utils.APIResponse "Unauthorized - Authentication required"
+// @Failure 404 {object} utils.APIResponse "User not found"
+// @Failure 500 {object} utils.APIResponse "Internal Server Error"
+// @Router /users/{id} [get]
+func (h *userHandlerImpl) GetUserByID(c *fiber.Ctx) error {
+	id := c.Params("id")
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid user ID", err.Error())
+	}
+
+	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
+	defer cancel()
+
+	user, err := h.userRepo.FindUserByID(ctx, objectID)
+	if err != nil {
+		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to get user", err.Error())
+	}
+	if user == nil {
+		return utils.SendErrorResponse(c, fiber.StatusNotFound, "User not found", nil)
+	}
+
+	return utils.SendSuccessResponse(c, fiber.StatusOK, "User retrieved successfully", dto.UserResponse{
+		ID:          user.ID.Hex(),
+		Username:    user.Username,
+		Email:       user.Email,
+		Avatar:      user.Avatar,
+		Status:      user.Status,
+		IsActive:    user.IsActive,
+		Roles:       user.Roles,
+		CreatedAt:   user.CreatedAt,
+		BusinessIDs: user.BusinessIDs,
+	})
 }

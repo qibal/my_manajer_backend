@@ -2,11 +2,13 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"backend_my_manajer/dto"
 	"backend_my_manajer/model"
 	"backend_my_manajer/repository"
+	"backend_my_manajer/service"
 	"backend_my_manajer/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -27,13 +29,15 @@ type ChannelHandler interface {
 
 // channelHandlerImpl adalah implementasi dari ChannelHandler.
 type channelHandlerImpl struct {
-	repo repository.ChannelRepository
+	repo               repository.ChannelRepository
+	activityLogService service.ActivityLogService
 }
 
 // NewChannelHandler membuat instance baru dari ChannelHandler.
-func NewChannelHandler(repo repository.ChannelRepository) ChannelHandler {
+func NewChannelHandler(repo repository.ChannelRepository, activityLogService service.ActivityLogService) ChannelHandler {
 	return &channelHandlerImpl{
-		repo: repo,
+		repo:               repo,
+		activityLogService: activityLogService,
 	}
 }
 
@@ -54,7 +58,10 @@ func (h *channelHandlerImpl) CreateChannel(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Input tidak valid", "Format body request salah")
 	}
 
-	// TODO: Implementasi validasi DTO menggunakan library validator (misal: go-playground/validator).
+	userID, ok := c.Locals("userID").(string)
+	if !ok || userID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "User ID tidak ditemukan di token", nil)
+	}
 
 	businessID, err := primitive.ObjectIDFromHex(req.BusinessID)
 	if err != nil {
@@ -88,6 +95,8 @@ func (h *channelHandlerImpl) CreateChannel(c *fiber.Ctx) error {
 		utils.LogError(err, "Gagal membuat channel di repository")
 		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Gagal membuat channel", err.Error())
 	}
+
+	go h.activityLogService.LogActivity(context.Background(), userID, fmt.Sprintf("Created channel '%s' in business %s", channel.Name, req.BusinessID), c.Method(), c.Path(), fiber.StatusCreated, c.IP())
 
 	resp := dto.ChannelResponse{
 		ID:         channel.ID.Hex(),
@@ -213,6 +222,11 @@ func (h *channelHandlerImpl) UpdateChannel(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID tidak boleh kosong", nil)
 	}
 
+	userID, ok := c.Locals("userID").(string)
+	if !ok || userID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "User ID tidak ditemukan di token", nil)
+	}
+
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID tidak valid", err.Error())
@@ -223,8 +237,6 @@ func (h *channelHandlerImpl) UpdateChannel(c *fiber.Ctx) error {
 		utils.LogError(err, "Gagal parse body request untuk update channel")
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Input tidak valid", "Format body request salah")
 	}
-
-	// TODO: Implementasi validasi DTO menggunakan library validator.
 
 	updateMap := bson.M{}
 	setMap := bson.M{}
@@ -274,6 +286,8 @@ func (h *channelHandlerImpl) UpdateChannel(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusNotFound, "Channel tidak ditemukan untuk diperbarui", nil)
 	}
 
+	go h.activityLogService.LogActivity(context.Background(), userID, fmt.Sprintf("Updated channel: %s (ID: %s)", updatedChannel.Name, id), c.Method(), c.Path(), fiber.StatusOK, c.IP())
+
 	resp := dto.ChannelResponse{
 		ID:         updatedChannel.ID.Hex(),
 		BusinessID: updatedChannel.BusinessID.Hex(),
@@ -307,6 +321,11 @@ func (h *channelHandlerImpl) DeleteChannel(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID tidak boleh kosong", nil)
 	}
 
+	userID, ok := c.Locals("userID").(string)
+	if !ok || userID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "User ID tidak ditemukan di token", nil)
+	}
+
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID tidak valid", err.Error())
@@ -314,6 +333,18 @@ func (h *channelHandlerImpl) DeleteChannel(c *fiber.Ctx) error {
 
 	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
+
+	// Get channel before deleting to log its name
+	channelToDelete, err := h.repo.GetChannelByID(ctx, objectID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return utils.SendErrorResponse(c, fiber.StatusNotFound, "Channel tidak ditemukan", nil)
+		}
+		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Gagal memeriksa channel untuk dihapus", err.Error())
+	}
+	if channelToDelete == nil {
+		return utils.SendErrorResponse(c, fiber.StatusNotFound, "Channel tidak ditemukan", nil)
+	}
 
 	if err := h.repo.DeleteChannel(ctx, objectID); err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -323,6 +354,8 @@ func (h *channelHandlerImpl) DeleteChannel(c *fiber.Ctx) error {
 		utils.LogError(err, "Gagal menghapus channel di repository: %s", id)
 		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Gagal menghapus channel", err.Error())
 	}
+
+	go h.activityLogService.LogActivity(context.Background(), userID, fmt.Sprintf("Deleted channel: %s (ID: %s)", channelToDelete.Name, id), c.Method(), c.Path(), fiber.StatusOK, c.IP())
 
 	return utils.SendSuccessResponse(c, fiber.StatusOK, "Channel berhasil dihapus", nil)
 }

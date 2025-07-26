@@ -2,28 +2,29 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"backend_my_manajer/dto"
 	"backend_my_manajer/model"
 	"backend_my_manajer/repository"
+	"backend_my_manajer/service"
 	"backend_my_manajer/utils"
 
-	// "github.com/go-playground/validator/v10" // Dihapus
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type RoleHandler struct {
-	repo *repository.RoleRepository
-	// validate *validator.Validate // Dihapus
+	repo               *repository.RoleRepository
+	activityLogService service.ActivityLogService
 }
 
-func NewRoleHandler(repo *repository.RoleRepository) *RoleHandler {
+func NewRoleHandler(repo *repository.RoleRepository, activityLogService service.ActivityLogService) *RoleHandler {
 	return &RoleHandler{
-		repo: repo,
-		// validate: validator.New(), // Dihapus
+		repo:               repo,
+		activityLogService: activityLogService,
 	}
 }
 
@@ -47,6 +48,11 @@ func (h *RoleHandler) CreateRole(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
 	}
 
+	userID, ok := c.Locals("userID").(string)
+	if !ok || userID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "User ID tidak ditemukan di token", nil)
+	}
+
 	// Validasi input manual (mengikuti pola business_handler.go)
 	if req.Name == "" || req.BusinessID == "" {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Nama dan BusinessID diperlukan", nil)
@@ -67,6 +73,8 @@ func (h *RoleHandler) CreateRole(c *fiber.Ctx) error {
 	if err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Gagal membuat role", err.Error())
 	}
+
+	go h.activityLogService.LogActivity(context.Background(), userID, fmt.Sprintf("Created role '%s' in business %s", role.Name, req.BusinessID), c.Method(), c.Path(), fiber.StatusCreated, c.IP())
 
 	return utils.SendSuccessResponse(c, fiber.StatusCreated, "Role berhasil dibuat", dto.RoleResponse{
 		ID:          role.ID.Hex(),
@@ -169,6 +177,11 @@ func (h *RoleHandler) UpdateRole(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Role ID diperlukan", nil)
 	}
 
+	userID, ok := c.Locals("userID").(string)
+	if !ok || userID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "User ID tidak ditemukan di token", nil)
+	}
+
 	roleID, err := primitive.ObjectIDFromHex(roleIDStr)
 	if err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID role tidak valid", err.Error())
@@ -208,6 +221,8 @@ func (h *RoleHandler) UpdateRole(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Gagal memperbarui role", err.Error())
 	}
 
+	go h.activityLogService.LogActivity(context.Background(), userID, fmt.Sprintf("Updated role: %s (ID: %s)", existingRole.Name, roleIDStr), c.Method(), c.Path(), fiber.StatusOK, c.IP())
+
 	return utils.SendSuccessResponse(c, fiber.StatusOK, "Role berhasil diperbarui", nil)
 }
 
@@ -231,6 +246,11 @@ func (h *RoleHandler) DeleteRole(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Role ID diperlukan", nil)
 	}
 
+	userID, ok := c.Locals("userID").(string)
+	if !ok || userID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "User ID tidak ditemukan di token", nil)
+	}
+
 	roleID, err := primitive.ObjectIDFromHex(roleIDStr)
 	if err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID role tidak valid", err.Error())
@@ -251,6 +271,8 @@ func (h *RoleHandler) DeleteRole(c *fiber.Ctx) error {
 		}
 		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Gagal menghapus role", err.Error())
 	}
+
+	go h.activityLogService.LogActivity(context.Background(), userID, fmt.Sprintf("Deleted role: %s (ID: %s)", existingRole.Name, roleIDStr), c.Method(), c.Path(), fiber.StatusOK, c.IP())
 
 	return c.SendStatus(fiber.StatusNoContent) // 204 No Content for successful deletion
 }

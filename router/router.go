@@ -19,5 +19,7 @@ func SetupRoutes(app *fiber.App, dbClient *mongo.Client) {
 	SetupChannelCategoryRoutes(api, dbClient)
 	SetupMessageRoutes(api, dbClient)
 	SetupRoleRoutes(api, dbClient)
+	SetupDatabaseRoutes(api, dbClient)    // Menambahkan SetupDatabaseRoutes
+	SetupActivityLogRoutes(api, dbClient) // Menambahkan rute untuk log aktivitas
 	// Tambahkan setup route lain di sini jika ada
 }

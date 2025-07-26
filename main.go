@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -36,7 +37,17 @@ import (
 // @description "Type 'Bearer' followed by a space and JWT token."
 func main() {
 	// Muat file .env
+
 	err := godotenv.Load()
+	fmt.Println("ENV JWT_SECRET_KEY:", os.Getenv("JWT_SECRET_KEY"))
+	if err != nil && !os.IsNotExist(err) {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	utils.JWTSecretKey, err = utils.GetJWTSecretKey()
+	if err != nil {
+		log.Fatal(err)
+	}
 	if err != nil && !os.IsNotExist(err) {
 		log.Fatalf("Error loading .env file: %v", err)
 	}

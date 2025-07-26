@@ -30,6 +30,9 @@ var DBConfig = DatabaseConfig{
 		"Channels":          "channels",           // Contoh untuk koleksi Channels
 		"ChannelCategories": "channel_categories", // Koleksi baru untuk kategori channel
 		"Messages":          "messages",           // Koleksi baru untuk pesan
+		"Databases":         "databases",          // Menambahkan koleksi Database di sini
+		"Roles":             "roles",              // Tambahkan koleksi Roles di sini
+		"ActivityLogs":      "activity_logs",      // Koleksi untuk log aktivitas
 		// Tambahkan koleksi lain di sini sesuai kebutuhan Anda
 	},
 }

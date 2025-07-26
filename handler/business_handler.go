@@ -2,11 +2,13 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"backend_my_manajer/dto"
 	"backend_my_manajer/model"
 	"backend_my_manajer/repository"
+	"backend_my_manajer/service"
 	"backend_my_manajer/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -26,13 +28,15 @@ type BusinessHandler interface {
 
 // businessHandlerImpl adalah implementasi dari BusinessHandler.
 type businessHandlerImpl struct {
-	repo repository.BusinessRepository
+	repo               repository.BusinessRepository
+	activityLogService service.ActivityLogService
 }
 
 // NewBusinessHandler membuat instance baru dari BusinessHandler.
-func NewBusinessHandler(repo repository.BusinessRepository) BusinessHandler {
+func NewBusinessHandler(repo repository.BusinessRepository, activityLogService service.ActivityLogService) BusinessHandler {
 	return &businessHandlerImpl{
-		repo: repo,
+		repo:               repo,
+		activityLogService: activityLogService,
 	}
 }
 
@@ -53,12 +57,13 @@ func (h *businessHandlerImpl) CreateBusiness(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Input tidak valid", "Format body request salah")
 	}
 
+	ownerID, ok := c.Locals("userID").(string)
+	if !ok || ownerID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "User ID tidak ditemukan di token", nil)
+	}
+
 	// TODO: Implementasi validasi DTO menggunakan library validator (misal: go-playground/validator).
 	// Saat ini, validasi hanya berdasarkan tag `validate` di struct DTO.
-
-	// Asumsi OwnerID diambil dari token JWT yang sudah diverifikasi.
-	// Untuk contoh sederhana, kita gunakan placeholder.
-	ownerID := "placeholder_owner_id" // Ganti dengan logika pengambilan dari JWT
 
 	business := &model.Business{
 		// ID:        utils.GenerateRandomID(), // Akan dibuat di utils/constants.go
@@ -77,6 +82,9 @@ func (h *businessHandlerImpl) CreateBusiness(c *fiber.Ctx) error {
 		utils.LogError(err, "Gagal membuat bisnis di repository")
 		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Gagal membuat bisnis", err.Error())
 	}
+
+	// Log activity
+	go h.activityLogService.LogActivity(context.Background(), ownerID, fmt.Sprintf("Created business: %s", business.Name), c.Method(), c.Path(), fiber.StatusCreated, c.IP())
 
 	// Mengkonversi model.Business ke dto.BusinessResponse untuk respons
 	resp := dto.BusinessResponse{
@@ -200,6 +208,11 @@ func (h *businessHandlerImpl) UpdateBusiness(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID tidak boleh kosong", nil)
 	}
 
+	userID, ok := c.Locals("userID").(string)
+	if !ok || userID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "User ID tidak ditemukan di token", nil)
+	}
+
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID tidak valid", err.Error())
@@ -247,6 +260,9 @@ func (h *businessHandlerImpl) UpdateBusiness(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusNotFound, "Bisnis tidak ditemukan untuk diperbarui", nil)
 	}
 
+	// Log activity
+	go h.activityLogService.LogActivity(context.Background(), userID, fmt.Sprintf("Updated business: %s", updatedBusiness.Name), c.Method(), c.Path(), fiber.StatusOK, c.IP())
+
 	// Mengkonversi model.Business ke dto.BusinessResponse untuk respons
 	resp := dto.BusinessResponse{
 		ID:        updatedBusiness.ID.Hex(),
@@ -279,6 +295,11 @@ func (h *businessHandlerImpl) DeleteBusiness(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID tidak boleh kosong", nil)
 	}
 
+	userID, ok := c.Locals("userID").(string)
+	if !ok || userID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "User ID tidak ditemukan di token", nil)
+	}
+
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID tidak valid", err.Error())
@@ -286,6 +307,18 @@ func (h *businessHandlerImpl) DeleteBusiness(c *fiber.Ctx) error {
 
 	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
+
+	// Get business before deleting to log its name
+	businessToDelete, err := h.repo.GetBusinessByID(ctx, objectID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return utils.SendErrorResponse(c, fiber.StatusNotFound, "Bisnis tidak ditemukan", nil)
+		}
+		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Gagal memeriksa bisnis untuk dihapus", err.Error())
+	}
+	if businessToDelete == nil {
+		return utils.SendErrorResponse(c, fiber.StatusNotFound, "Bisnis tidak ditemukan", nil)
+	}
 
 	if err := h.repo.DeleteBusiness(ctx, objectID); err != nil {
 		// Khusus untuk error mongo.ErrNoDocuments dari repository DeleteBusiness
@@ -296,6 +329,9 @@ func (h *businessHandlerImpl) DeleteBusiness(c *fiber.Ctx) error {
 		utils.LogError(err, "Gagal menghapus bisnis di repository: %s", id)
 		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Gagal menghapus bisnis", err.Error())
 	}
+
+	// Log activity
+	go h.activityLogService.LogActivity(context.Background(), userID, fmt.Sprintf("Deleted business: %s", businessToDelete.Name), c.Method(), c.Path(), fiber.StatusOK, c.IP())
 
 	return utils.SendSuccessResponse(c, fiber.StatusOK, "Bisnis berhasil dihapus", nil)
 }

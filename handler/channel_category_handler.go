@@ -2,11 +2,13 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"backend_my_manajer/dto"
 	"backend_my_manajer/model"
 	"backend_my_manajer/repository"
+	"backend_my_manajer/service"
 	"backend_my_manajer/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -27,13 +29,15 @@ type ChannelCategoryHandler interface {
 
 // channelCategoryHandlerImpl adalah implementasi dari ChannelCategoryHandler.
 type channelCategoryHandlerImpl struct {
-	repo repository.ChannelCategoryRepository
+	repo               repository.ChannelCategoryRepository
+	activityLogService service.ActivityLogService
 }
 
 // NewChannelCategoryHandler membuat instance baru dari ChannelCategoryHandler.
-func NewChannelCategoryHandler(repo repository.ChannelCategoryRepository) ChannelCategoryHandler {
+func NewChannelCategoryHandler(repo repository.ChannelCategoryRepository, activityLogService service.ActivityLogService) ChannelCategoryHandler {
 	return &channelCategoryHandlerImpl{
-		repo: repo,
+		repo:               repo,
+		activityLogService: activityLogService,
 	}
 }
 
@@ -52,6 +56,11 @@ func (h *channelCategoryHandlerImpl) CreateChannelCategory(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		utils.LogError(err, "Gagal parse body request untuk membuat kategori channel")
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Input tidak valid", "Format body request salah")
+	}
+
+	userID, ok := c.Locals("userID").(string)
+	if !ok || userID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "User ID tidak ditemukan di token", nil)
 	}
 
 	// TODO: Implementasi validasi DTO menggunakan library validator.
@@ -73,6 +82,8 @@ func (h *channelCategoryHandlerImpl) CreateChannelCategory(c *fiber.Ctx) error {
 		utils.LogError(err, "Gagal membuat kategori channel di repository")
 		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Gagal membuat kategori channel", err.Error())
 	}
+
+	go h.activityLogService.LogActivity(context.Background(), userID, fmt.Sprintf("Created channel category '%s' in business %s", category.Name, req.BusinessID), c.Method(), c.Path(), fiber.StatusCreated, c.IP())
 
 	resp := dto.ChannelCategoryResponse{
 		ID:         category.ID.Hex(),
@@ -222,6 +233,11 @@ func (h *channelCategoryHandlerImpl) UpdateChannelCategory(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID tidak boleh kosong", nil)
 	}
 
+	userID, ok := c.Locals("userID").(string)
+	if !ok || userID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "User ID tidak ditemukan di token", nil)
+	}
+
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID tidak valid", err.Error())
@@ -263,6 +279,8 @@ func (h *channelCategoryHandlerImpl) UpdateChannelCategory(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusNotFound, "Kategori channel tidak ditemukan untuk diperbarui", nil)
 	}
 
+	go h.activityLogService.LogActivity(context.Background(), userID, fmt.Sprintf("Updated channel category: %s (ID: %s)", updatedCategory.Name, id), c.Method(), c.Path(), fiber.StatusOK, c.IP())
+
 	resp := dto.ChannelCategoryResponse{
 		ID:        updatedCategory.ID.Hex(),
 		Name:      updatedCategory.Name,
@@ -289,6 +307,11 @@ func (h *channelCategoryHandlerImpl) DeleteChannelCategory(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID tidak boleh kosong", nil)
 	}
 
+	userID, ok := c.Locals("userID").(string)
+	if !ok || userID == "" {
+		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "User ID tidak ditemukan di token", nil)
+	}
+
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "ID tidak valid", err.Error())
@@ -296,6 +319,11 @@ func (h *channelCategoryHandlerImpl) DeleteChannelCategory(c *fiber.Ctx) error {
 
 	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
+
+	categoryToDelete, err := h.repo.GetChannelCategoryByID(ctx, objectID)
+	if err != nil || categoryToDelete == nil {
+		return utils.SendErrorResponse(c, fiber.StatusNotFound, "Kategori channel tidak ditemukan", err)
+	}
 
 	if err := h.repo.DeleteChannelCategory(ctx, objectID); err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -305,6 +333,8 @@ func (h *channelCategoryHandlerImpl) DeleteChannelCategory(c *fiber.Ctx) error {
 		utils.LogError(err, "Gagal menghapus kategori channel di repository: %s", id)
 		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Gagal menghapus kategori channel", err.Error())
 	}
+
+	go h.activityLogService.LogActivity(context.Background(), userID, fmt.Sprintf("Deleted channel category: %s (ID: %s)", categoryToDelete.Name, id), c.Method(), c.Path(), fiber.StatusOK, c.IP())
 
 	return utils.SendSuccessResponse(c, fiber.StatusOK, "Kategori channel berhasil dihapus", nil)
 }

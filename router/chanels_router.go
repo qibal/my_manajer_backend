@@ -4,6 +4,7 @@ import (
 	"backend_my_manajer/handler"
 	"backend_my_manajer/middleware" // Mengimpor middleware
 	"backend_my_manajer/repository"
+	"backend_my_manajer/service"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,9 +13,11 @@ import (
 // SetupChannelRoutes mendaftarkan semua rute API untuk entitas Channel.
 // router adalah instance Fiber.Router (bisa *fiber.App atau grup rute), dan dbClient adalah koneksi MongoDB.
 func SetupChannelRoutes(router fiber.Router, dbClient *mongo.Client) {
-	// Inisialisasi repository dan handler untuk Channel
+	// Inisialisasi repository, service, dan handler untuk Channel
 	channelRepo := repository.NewChannelRepository(dbClient)
-	channelHandler := handler.NewChannelHandler(channelRepo)
+	activityLogRepo := repository.NewActivityLogRepository(dbClient)
+	activityLogService := service.NewActivityLogService(activityLogRepo)
+	channelHandler := handler.NewChannelHandler(channelRepo, activityLogService)
 
 	// Menerapkan middleware autentikasi ke semua rute channel
 	channelRoutes := router.Group("/channels", middleware.AuthMiddleware())

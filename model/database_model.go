@@ -6,12 +6,21 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// SelectOption merepresentasikan opsi untuk kolom bertipe "select".
+type SelectOption struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Value     string             `json:"value"`
+	Order     int                `json:"order"`
+	CreatedAt time.Time          `json:"createdAt"`
+}
+
 // DatabaseColumn merepresentasikan kolom dalam sebuah database.
 type DatabaseColumn struct {
 	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Name    string             `json:"name"`
 	Type    string             `json:"type"`              // e.g., "date", "text", "select", "boolean"
-	Options []string           `json:"options,omitempty"` // Only for type "select"
+	Options []SelectOption     `json:"options,omitempty"` // Only for type "select"
+	Order   int                `json:"order"`             // Menambahkan field order
 }
 
 // DatabaseRowValue merepresentasikan nilai-nilai dalam satu baris data.

@@ -7,6 +7,7 @@ import (
 	"backend_my_manajer/dto"
 	"backend_my_manajer/model"
 	"backend_my_manajer/repository"
+	"backend_my_manajer/service"
 	"backend_my_manajer/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -18,12 +19,16 @@ type AuthHandler interface {
 }
 
 type authHandlerImpl struct {
-	userRepo repository.UserRepository
+	userRepo           repository.UserRepository
+	activityLogService service.ActivityLogService
 }
 
 // NewAuthHandler membuat instance baru dari AuthHandler.
-func NewAuthHandler(userRepo repository.UserRepository) AuthHandler {
-	return &authHandlerImpl{userRepo: userRepo}
+func NewAuthHandler(userRepo repository.UserRepository, activityLogService service.ActivityLogService) AuthHandler {
+	return &authHandlerImpl{
+		userRepo:           userRepo,
+		activityLogService: activityLogService,
+	}
 }
 
 // Login handles the user login request.
@@ -41,10 +46,12 @@ func NewAuthHandler(userRepo repository.UserRepository) AuthHandler {
 func (h *authHandlerImpl) Login(c *fiber.Ctx) error {
 	var req dto.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
+		go h.activityLogService.LogActivity(context.Background(), "N/A", "Login Attempt Failed: Invalid Body", c.Method(), c.Path(), fiber.StatusBadRequest, c.IP())
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
 	}
 
 	if (req.Email == "" && req.Username == "") || req.Password == "" {
+		go h.activityLogService.LogActivity(context.Background(), "N/A", "Login Attempt Failed: Missing Credentials", c.Method(), c.Path(), fiber.StatusBadRequest, c.IP())
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Email/Username and password are required", nil)
 	}
 
@@ -53,41 +60,40 @@ func (h *authHandlerImpl) Login(c *fiber.Ctx) error {
 
 	var user *model.User
 	var err error
+	var identifier string
 
 	if req.Email != "" {
+		identifier = req.Email
 		user, err = h.userRepo.FindUserByEmail(ctx, req.Email)
-		if err != nil {
-			return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Error finding user by email", err.Error())
-		}
 	} else if req.Username != "" {
+		identifier = req.Username
 		user, err = h.userRepo.FindUserByUsername(ctx, req.Username)
-		if err != nil {
-			return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Error finding user by username", err.Error())
-		}
+	}
+
+	if err != nil {
+		go h.activityLogService.LogActivity(context.Background(), identifier, "Login Attempt Failed: DB Error", c.Method(), c.Path(), fiber.StatusInternalServerError, c.IP())
+		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Error finding user", err.Error())
 	}
 
 	if user == nil {
+		go h.activityLogService.LogActivity(context.Background(), identifier, "Login Failed: Invalid Credentials", c.Method(), c.Path(), fiber.StatusUnauthorized, c.IP())
 		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "Invalid credentials", nil)
 	}
 
 	if !utils.CheckPasswordHash(req.Password, user.PasswordHash) {
+		go h.activityLogService.LogActivity(context.Background(), user.ID.Hex(), "Login Failed: Invalid Password", c.Method(), c.Path(), fiber.StatusUnauthorized, c.IP())
 		return utils.SendErrorResponse(c, fiber.StatusUnauthorized, "Invalid credentials", nil)
 	}
 
 	token, err := utils.GenerateJWTToken(user.ID.Hex(), user.Email, user.Roles)
 	if err != nil {
+		go h.activityLogService.LogActivity(context.Background(), user.ID.Hex(), "Login Error: Token Generation Failed", c.Method(), c.Path(), fiber.StatusInternalServerError, c.IP())
 		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to generate token", err.Error())
 	}
 
+	go h.activityLogService.LogActivity(context.Background(), user.ID.Hex(), "Login Successful", c.Method(), c.Path(), fiber.StatusOK, c.IP())
+
 	return utils.SendSuccessResponse(c, fiber.StatusOK, "Login successful", dto.LoginResponse{
-		Token:       token,
-		ID:          user.ID.Hex(),
-		Username:    user.Username,
-		Email:       user.Email,
-		Avatar:      user.Avatar,
-		IsActive:    user.IsActive,
-		Roles:       user.Roles,
-		CreatedAt:   user.CreatedAt,
-		BusinessIDs: user.BusinessIDs,
+		Token: token,
 	})
 }
