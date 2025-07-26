@@ -29,7 +29,7 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host my-manajer-production.up.railway.app
+// @host mymanajerbackend-production.up.railway.app
 // @BasePath /api/v1
 // @schemes http https
 // @securityDefinitions.apikey ApiKeyAuth

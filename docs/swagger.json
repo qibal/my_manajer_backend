@@ -19,7 +19,7 @@
         },
         "version": "1.0"
     },
-    "host": "my-manajer-production.up.railway.app",
+    "host": "mymanajerbackend-production.up.railway.app",
     "basePath": "/api/v1",
     "paths": {
         "/auth/login": {
