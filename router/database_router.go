@@ -18,7 +18,7 @@ func SetupDatabaseRoutes(router fiber.Router, dbClient *mongo.Client) {
 	dbRoutes := router.Group("/databases")
 
 	// Middleware autentikasi untuk semua rute database
-	dbRoutes.Use(middleware.AuthMiddleware())
+	// dbRoutes.Use(middleware.AuthMiddleware())
 
 	// Rute CRUD untuk Database
 	dbRoutes.Post("/", dbHandler.CreateDatabase)
