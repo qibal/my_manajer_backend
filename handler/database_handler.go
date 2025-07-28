@@ -449,9 +449,10 @@ func (h *databaseHandlerImpl) UpdateDatabase(c *fiber.Ctx) error {
 			if !validTypes[colReq.Type] {
 				return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Validation error", "Invalid Column Type. Allowed types: date, text, select, boolean, number")
 			}
-			if colReq.Type == "select" && len(colReq.Options) == 0 {
-				return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Validation error", "Column Options are required for 'select' type")
-			}
+
+			// if colReq.Type == "select" && len(colReq.Options) == 0 {
+			// 	return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Validation error", "Column Options are required for 'select' type")
+			// }
 
 			colID, err := primitive.ObjectIDFromHex(colReq.ID)
 			if err != nil {
@@ -1021,13 +1022,13 @@ func (h *databaseHandlerImpl) UpdateColumnInDatabase(c *fiber.Ctx) error {
 	setMap := updateData["$set"].(bson.M)
 
 	if req.Name != "" {
-		setMap["name"] = req.Name
+		setMap["databaseData.columns.$.name"] = req.Name
 	}
 	if req.Type != "" {
-		setMap["type"] = req.Type
+		setMap["databaseData.columns.$.type"] = req.Type
 	}
 	if req.Order != 0 {
-		setMap["order"] = req.Order
+		setMap["databaseData.columns.$.order"] = req.Order
 	}
 
 	// Jika tipe kolom berubah menjadi 'select' dan ada opsi, atau tipe tetap 'select' dan opsi diperbarui
@@ -1041,10 +1042,10 @@ func (h *databaseHandlerImpl) UpdateColumnInDatabase(c *fiber.Ctx) error {
 				CreatedAt: time.Now(),
 			})
 		}
-		setMap["options"] = selectOptions
+		setMap["databaseData.columns.$.options"] = selectOptions
 	} else if req.Type != "select" && existingColumn.Type == "select" && req.Options == nil {
 		// Jika tipe berubah dari 'select' ke non-select, hapus opsi yang ada
-		setMap["options"] = []model.SelectOption{}
+		setMap["databaseData.columns.$.options"] = []model.SelectOption{}
 	}
 
 	updatedDatabase, err := h.dbRepo.UpdateColumnInDatabase(ctx, databaseID, columnID, updateData)
