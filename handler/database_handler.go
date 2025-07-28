@@ -105,16 +105,17 @@ func (h *databaseHandlerImpl) CreateDatabase(c *fiber.Ctx) error {
 
 		var selectOptions []model.SelectOption
 		if colReq.Type == "select" {
-			if len(colReq.Options) == 0 {
-				return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Validation error", "Column Options are required for 'select' type")
-			}
-			for optIdx, optValue := range colReq.Options {
-				selectOptions = append(selectOptions, model.SelectOption{
-					ID:        primitive.NewObjectID(),
-					Value:     optValue,
-					Order:     optIdx + 1,
-					CreatedAt: time.Now(),
-				})
+			// Initialize as an empty slice for 'select' type to avoid 'null' in DB
+			selectOptions = make([]model.SelectOption, 0)
+			if len(colReq.Options) > 0 {
+				for optIdx, optValue := range colReq.Options {
+					selectOptions = append(selectOptions, model.SelectOption{
+						ID:        primitive.NewObjectID(),
+						Value:     optValue,
+						Order:     optIdx + 1,
+						CreatedAt: time.Now(),
+					})
+				}
 			}
 		}
 
@@ -450,24 +451,24 @@ func (h *databaseHandlerImpl) UpdateDatabase(c *fiber.Ctx) error {
 				return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Validation error", "Invalid Column Type. Allowed types: date, text, select, boolean, number")
 			}
 
-			// if colReq.Type == "select" && len(colReq.Options) == 0 {
-			// 	return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Validation error", "Column Options are required for 'select' type")
-			// }
-
 			colID, err := primitive.ObjectIDFromHex(colReq.ID)
 			if err != nil {
 				colID = primitive.NewObjectID()
 			}
 
 			var selectOptions []model.SelectOption
-			if colReq.Type == "select" && len(colReq.Options) > 0 {
-				for optIdx, optValue := range colReq.Options {
-					selectOptions = append(selectOptions, model.SelectOption{
-						ID:        primitive.NewObjectID(), // Akan diganti jika ID opsi disediakan
-						Value:     optValue,
-						Order:     optIdx + 1,
-						CreatedAt: time.Now(),
-					})
+			if colReq.Type == "select" {
+				// Initialize as an empty slice to avoid 'null' in DB
+				selectOptions = make([]model.SelectOption, 0)
+				if len(colReq.Options) > 0 {
+					for optIdx, optValue := range colReq.Options {
+						selectOptions = append(selectOptions, model.SelectOption{
+							ID:        primitive.NewObjectID(), // Akan diganti jika ID opsi disediakan
+							Value:     optValue,
+							Order:     optIdx + 1,
+							CreatedAt: time.Now(),
+						})
+					}
 				}
 			}
 
