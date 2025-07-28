@@ -168,15 +168,20 @@ func (r *databaseRepositoryImpl) AddRowToDatabase(ctx context.Context, databaseI
 // UpdateColumnInDatabase memperbarui sebuah kolom tertentu dalam dokumen database.
 func (r *databaseRepositoryImpl) UpdateColumnInDatabase(ctx context.Context, databaseID, columnID primitive.ObjectID, updateData bson.M) (*model.Database, error) {
 	filter := bson.M{"_id": databaseID, "databaseData.columns._id": columnID}
-	update := bson.M{
-		"$set": bson.M{
-			"databaseData.columns.$": updateData, // Memperbarui seluruh objek kolom yang cocok
-			"updatedAt":              time.Now(),
-		},
+
+	// Pastikan updateData memiliki $set
+	setMap, ok := updateData["$set"].(bson.M)
+	if !ok {
+		return nil, fmt.Errorf("updateData harus mengandung operator $set")
 	}
+
+	// Tambahkan updatedAt ke map yang ada
+	setMap["updatedAt"] = time.Now()
+
 	opts := options.FindOneAndUpdate().SetReturnDocument(options.After)
 	var updatedDatabase model.Database
-	err := r.collection.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDatabase)
+	// Gunakan updateData langsung karena sudah diformat dengan benar di handler
+	err := r.collection.FindOneAndUpdate(ctx, filter, updateData, opts).Decode(&updatedDatabase)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			utils.LogWarning("Database dengan ID %s atau Kolom ID %s tidak ditemukan untuk diperbarui", databaseID.Hex(), columnID.Hex())
